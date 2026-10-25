@@ -1,0 +1,31 @@
+@if (interactive()) {
+  <button type="button" class="kpi" [attr.data-tone]="tone()" [class.active]="active()" [attr.aria-pressed]="active()" (click)="selected.emit()">
+    <ng-container *ngTemplateOutlet="body" />
+  </button>
+} @else {
+  <div class="kpi" [attr.data-tone]="tone()">
+    <ng-container *ngTemplateOutlet="body" />
+  </div>
+}
+
+<ng-template #body>
+  <span class="kpi-icon" aria-hidden="true"><ion-icon [name]="icon()"></ion-icon></span>
+  <span class="kpi-main">
+    <span class="kpi-label">{{ label() }}</span>
+    @if (loading()) {
+      <ion-skeleton-text [animated]="true" class="kpi-skeleton"></ion-skeleton-text>
+      <span class="sr-only">Cargando</span>
+    } @else {
+      <span class="kpi-value">{{ display() }}</span>
+    }
+    @if (trendInfo(); as t) {
+      <span class="kpi-trend" [class.good]="t.good" [class.bad]="!t.good">
+        <span aria-hidden="true">{{ t.arrow }} {{ t.text }}</span>
+        <span class="sr-only">{{ t.sr }}</span>
+      </span>
+    }
+    @if (hint()) {
+      <span class="kpi-hint">{{ hint() }}</span>
+    }
+  </span>
+</ng-template>
