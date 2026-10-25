@@ -8,9 +8,10 @@ Aplicación de gestión empresarial **multiplataforma (PWA / híbrida)** para co
 
 | | |
 |---|---|
-| **Producción** | <https://nexostock.vercel.app> |
-| **Documentación técnica (Compodoc)** | <https://nexostock.vercel.app/docs/index.html> |
+| **Producción** | <https://nexostock-amber.vercel.app> |
+| **Documentación técnica (Compodoc)** | <https://nexostock-amber.vercel.app/docs/index.html> |
 | **Manual de usuario** | [docs/MANUAL_USUARIO.md](docs/MANUAL_USUARIO.md) y pantalla *Ayuda* dentro de la app |
+| **Repositorio** | <https://github.com/delucasfernandezvictor-arch/nexostock> |
 | **Credenciales de prueba** | Se entregan en el PDF de la actividad (no se publican en el repositorio) |
 
 ---
