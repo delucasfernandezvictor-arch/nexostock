@@ -1,0 +1,106 @@
+<div class="dt">
+  @if (searchable()) {
+    <div class="dt-toolbar">
+      <label class="dt-search" [for]="uid + '-search'">
+        <span class="sr-only">{{ searchPlaceholder() }} en {{ caption() }}</span>
+        <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+        <input
+          [id]="uid + '-search'"
+          type="search"
+          autocomplete="off"
+          [placeholder]="searchPlaceholder()"
+          [value]="search()"
+          (input)="onSearch($event)"
+          [attr.aria-controls]="uid + '-table'" />
+      </label>
+      <p class="dt-range" role="status" aria-live="polite">{{ rangeText() }}</p>
+    </div>
+  }
+
+  <div class="dt-scroll">
+    <table [id]="uid + '-table'" class="dt-table" [attr.aria-busy]="loading()">
+      <caption [class.sr-only]="!showCaption()">{{ caption() }}</caption>
+      <thead>
+        <tr>
+          @for (col of columns(); track col.key) {
+            <th scope="col" [attr.aria-sort]="ariaSort(col)" [class]="'al-' + align(col)" [class.hide-mobile]="col.hideOnMobile">
+              @if (col.sortable !== false) {
+                <button type="button" class="dt-sort" (click)="toggleSort(col)">
+                  {{ col.label }}
+                  <ion-icon aria-hidden="true"
+                    [name]="sort()?.key === col.key ? (sort()?.direction === 'asc' ? 'arrow-up' : 'arrow-down') : 'swap-vertical'"
+                    [class.inactive]="sort()?.key !== col.key"></ion-icon>
+                </button>
+              } @else {
+                {{ col.label }}
+              }
+            </th>
+          }
+          @if (actions().length) {
+            <th scope="col" class="al-end"><span class="sr-only">Acciones</span></th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          @for (s of skeletonRows; track $index) {
+            <tr class="dt-skeleton" aria-hidden="true">
+              @for (col of columns(); track col.key) {
+                <td><ion-skeleton-text [animated]="true"></ion-skeleton-text></td>
+              }
+              @if (actions().length) { <td></td> }
+            </tr>
+          }
+        } @else {
+          @for (vr of viewRows(); track vr.key) {
+            <tr
+              [class.clickable]="clickableRows()"
+              [attr.tabindex]="clickableRows() ? 0 : null"
+              [attr.aria-label]="clickableRows() ? 'Ver detalle de ' + labelFor(vr) : null"
+              (click)="onRowClick($event, vr.row)"
+              (keydown)="onRowKey($event, vr.row)">
+              @for (cell of vr.cells; track cell.key; let i = $index) {
+                <td [attr.data-label]="columns()[i]!.label" [class]="'al-' + align(columns()[i]!)" [class.hide-mobile]="columns()[i]!.hideOnMobile">
+                  @if (columns()[i]!.type === 'badge') {
+                    <app-status-badge [value]="cell.text" />
+                  } @else {
+                    {{ cell.text }}
+                  }
+                </td>
+              }
+              @if (vr.actions.length) {
+                <td class="dt-actions al-end" data-label="Acciones">
+                  @for (a of vr.actions; track a.id) {
+                    <ion-button fill="clear" size="small" [color]="a.color ?? 'primary'"
+                      [attr.aria-label]="a.label + ': ' + labelFor(vr)" [title]="a.label"
+                      (click)="emitAction($event, a, vr.row)">
+                      <ion-icon slot="icon-only" [name]="a.icon" aria-hidden="true"></ion-icon>
+                    </ion-button>
+                  }
+                </td>
+              } @else if (actions().length) {
+                <td class="dt-actions"></td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td class="dt-empty" [attr.colspan]="columns().length + (actions().length ? 1 : 0)">{{ emptyText() }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (totalPages() > 1 && !loading()) {
+    <nav class="dt-pager" [attr.aria-label]="'Paginación de ' + caption()">
+      <ion-button fill="outline" size="small" [disabled]="page() === 0" (click)="goTo(page() - 1)" aria-label="Página anterior">
+        <ion-icon slot="icon-only" name="chevron-back" aria-hidden="true"></ion-icon>
+      </ion-button>
+      <span aria-current="page">Página {{ page() + 1 }} de {{ totalPages() }}</span>
+      <ion-button fill="outline" size="small" [disabled]="page() >= totalPages() - 1" (click)="goTo(page() + 1)" aria-label="Página siguiente">
+        <ion-icon slot="icon-only" name="chevron-forward" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </nav>
+  }
+</div>
