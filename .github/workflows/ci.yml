@@ -1,0 +1,58 @@
+# Integración continua de NexoStock
+#  · Se ejecuta en cada push a main/develop/feature/** y en cada Pull Request.
+#  · Lint + tests unitarios + build de producción + documentación (Compodoc).
+#  · Si algún paso falla, el PR queda bloqueado (activar "Require status checks"
+#    en la protección de ramas de GitHub) y Vercel tampoco despliega, porque su
+#    comando de build (`npm run vercel-build`) también ejecuta los tests.
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**', 'release/**', 'hotfix/**']
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, tests y build
+    runs-on: ubuntu-latest
+    env:
+      # Valores de ejemplo: los tests no se conectan a Supabase
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_ANON_KEY: ci-placeholder-key-0000000000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint (ESLint + angular-eslint)
+        run: npm run lint
+
+      - name: Tests unitarios (Vitest)
+        run: npm run test:ci
+
+      - name: Build de producción (PWA)
+        run: npm run build
+
+      - name: Documentación técnica (Compodoc)
+        run: npm run docs
+
+      - name: Publicar documentación como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentacion-compodoc
+          path: documentation
+          retention-days: 30
