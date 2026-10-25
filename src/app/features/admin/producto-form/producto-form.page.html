@@ -1,0 +1,72 @@
+<app-page-header [title]="esEdicion() ? 'Editar producto' : 'Alta de producto'" backHref="/app/catalogo" />
+
+<ion-content>
+  <div class="page narrow">
+    @if (noEncontrado()) {
+      <app-empty-state icon="cube-outline" tone="error" title="Producto no encontrado" message="Puede que se haya eliminado.">
+        <ion-button (click)="cancelar()">Volver al catálogo</ion-button>
+      </app-empty-state>
+    } @else {
+      <form class="panel" [formGroup]="form" (ngSubmit)="guardar()" novalidate [attr.aria-busy]="cargando()">
+        <h2 class="form-title">{{ esEdicion() ? 'Datos del producto' : 'Nuevo producto' }}</h2>
+        <p class="muted">Los campos marcados con * son obligatorios.</p>
+
+        <ion-grid class="ion-no-padding">
+          <ion-row class="gap-row">
+            <ion-col size="12" sizeMd="5">
+              <ion-input class="field" fill="outline" label="SKU *" labelPlacement="stacked" placeholder="INF-0001" formControlName="sku"
+                autocapitalize="characters" [errorText]="skuError()" aria-describedby="sku-status" helperText="Formato AAA-0000"></ion-input>
+              <p id="sku-status" class="async-status" aria-live="polite"
+                [class.ok]="skuStatus() === 'VALID' && form.controls.sku.dirty" [class.ko]="form.controls.sku.hasError('skuTaken')">
+                @if (skuStatus() === 'PENDING') { <ion-spinner name="dots" aria-hidden="true"></ion-spinner> Comprobando SKU… }
+                @else if (skuStatus() === 'VALID' && form.controls.sku.dirty) { <ion-icon name="checkmark-circle" aria-hidden="true"></ion-icon> SKU disponible }
+                @else if (form.controls.sku.hasError('skuTaken')) { <ion-icon name="close-circle" aria-hidden="true"></ion-icon> SKU en uso }
+              </p>
+            </ion-col>
+            <ion-col size="12" sizeMd="7">
+              <ion-input class="field" fill="outline" label="Nombre *" labelPlacement="stacked" formControlName="nombre"
+                [counter]="true" maxlength="120" [errorText]="errorText(form.controls.nombre.errors)"></ion-input>
+            </ion-col>
+            <ion-col size="12">
+              <ion-textarea class="field" fill="outline" label="Descripción" labelPlacement="stacked" formControlName="descripcion"
+                [counter]="true" maxlength="500" [autoGrow]="true" [errorText]="errorText(form.controls.descripcion.errors)"></ion-textarea>
+            </ion-col>
+            <ion-col size="12" sizeMd="6">
+              <ion-select class="field" fill="outline" label="Categoría *" labelPlacement="stacked" interface="popover" formControlName="categoria_id"
+                placeholder="Selecciona una categoría" [errorText]="errorText(form.controls.categoria_id.errors)">
+                @for (c of categorias(); track c.id) { <ion-select-option [value]="c.id">{{ c.nombre }}</ion-select-option> }
+              </ion-select>
+            </ion-col>
+            <ion-col size="12" sizeMd="6">
+              <ion-input class="field" fill="outline" label="Precio (€) *" labelPlacement="stacked" type="number" inputmode="decimal"
+                min="0" step="0.01" formControlName="precio" [errorText]="errorText(form.controls.precio.errors)"></ion-input>
+            </ion-col>
+            <ion-col size="6">
+              <ion-input class="field" fill="outline" label="Stock *" labelPlacement="stacked" type="number" inputmode="numeric"
+                min="0" formControlName="stock" [errorText]="errorText(form.controls.stock.errors)"></ion-input>
+            </ion-col>
+            <ion-col size="6">
+              <ion-input class="field" fill="outline" label="Stock mínimo *" labelPlacement="stacked" type="number" inputmode="numeric"
+                min="0" formControlName="stock_minimo" [errorText]="errorText(form.controls.stock_minimo.errors)"
+                helperText="Avisa cuando el stock baja de aquí"></ion-input>
+            </ion-col>
+            <ion-col size="12">
+              @if (form.hasError('stockIncoherente')) {
+                <p class="form-alert error" role="alert">El stock mínimo es desproporcionado respecto al stock actual.</p>
+              }
+              <ion-toggle formControlName="activo" labelPlacement="end" justify="start">Producto activo (visible en el catálogo)</ion-toggle>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <div class="form-actions">
+          <ion-button type="button" fill="outline" (click)="cancelar()">Cancelar</ion-button>
+          <ion-button type="submit" [disabled]="guardando() || cargando() || skuStatus() === 'PENDING'">
+            @if (guardando()) { <ion-spinner name="crescent" aria-hidden="true"></ion-spinner><span class="sr-only">Guardando…</span> }
+            @else { <ion-icon slot="start" name="save-outline" aria-hidden="true"></ion-icon> {{ esEdicion() ? 'Guardar cambios' : 'Crear producto' }} }
+          </ion-button>
+        </div>
+      </form>
+    }
+  </div>
+</ion-content>

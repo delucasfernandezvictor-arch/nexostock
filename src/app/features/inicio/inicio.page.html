@@ -1,0 +1,93 @@
+<app-page-header title="Inicio" />
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content pullingText="Desliza para actualizar" refreshingText="Actualizando…"></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page">
+    <section class="hero" aria-labelledby="hero-title">
+      <div>
+        <h2 id="hero-title">{{ saludo() }}, {{ auth.displayName() }}</h2>
+        <p>
+          @if (auth.isAdmin()) { Tienes acceso completo como <strong>administrador</strong>: inventario, pedidos de toda la empresa y métricas. }
+          @else { Desde aquí puedes consultar el catálogo, hacer pedidos y seguir su estado en tiempo real. }
+        </p>
+      </div>
+      <div class="hero-actions">
+        <ion-button routerLink="/app/pedidos/nuevo">
+          <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon> Nuevo pedido
+        </ion-button>
+        @if (auth.isAdmin()) {
+          <ion-button fill="outline" routerLink="/app/dashboard">
+            <ion-icon slot="start" name="bar-chart-outline" aria-hidden="true"></ion-icon> Cuadro de mando
+          </ion-button>
+        }
+      </div>
+    </section>
+
+    @if (error()) {
+      <app-empty-state icon="alert-circle-outline" tone="error" title="No se pudieron cargar los datos" [message]="error()">
+        <ion-button (click)="data.reload()"><ion-icon slot="start" name="refresh-outline" aria-hidden="true"></ion-icon>Reintentar</ion-button>
+      </app-empty-state>
+    }
+
+    <h2 class="section-title">{{ auth.isAdmin() ? 'Resumen de la empresa' : 'Tu resumen' }}</h2>
+    <ion-grid class="ion-no-padding">
+      <ion-row class="gap-row">
+        <ion-col size="12" sizeSm="6" sizeXl="3">
+          <app-kpi-card [label]="auth.isAdmin() ? 'Pedidos totales' : 'Mis pedidos'" [value]="kpis().pedidos" icon="receipt-outline" [loading]="data.isLoading()" />
+        </ion-col>
+        <ion-col size="12" sizeSm="6" sizeXl="3">
+          <app-kpi-card label="En curso" [value]="kpis().pendientes" icon="time-outline" tone="warning" hint="Pendientes o aprobados" [loading]="data.isLoading()" />
+        </ion-col>
+        <ion-col size="12" sizeSm="6" sizeXl="3">
+          <app-kpi-card label="Importe este año" [value]="kpis().importeAnual" format="currency" icon="cash-outline" tone="success" [loading]="data.isLoading()" />
+        </ion-col>
+        <ion-col size="12" sizeSm="6" sizeXl="3">
+          <app-kpi-card label="Productos disponibles" [value]="kpis().disponibles" icon="cube-outline" tone="neutral"
+            [hint]="kpis().stockBajo + ' con stock bajo o agotado'" [loading]="data.isLoading()" />
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <div class="two-cols">
+      <section class="panel" aria-labelledby="ultimos-title">
+        <div class="panel-head">
+          <h2 id="ultimos-title">Últimos pedidos</h2>
+          <a routerLink="/app/pedidos">Ver todos</a>
+        </div>
+        <app-data-table caption="Últimos pedidos" [columns]="columns" [rows]="ultimos()" [searchable]="false"
+          [loading]="data.isLoading()" [clickableRows]="true" (rowClick)="abrirPedido($event)"
+          emptyText="Aún no hay pedidos. ¡Crea el primero!" />
+      </section>
+
+      <section class="panel" aria-labelledby="avisos-title">
+        <div class="panel-head">
+          <h2 id="avisos-title">Avisos de empresa</h2>
+          <span class="live" title="Actualización en tiempo real"><ion-icon name="radio-outline" aria-hidden="true"></ion-icon> En vivo</span>
+        </div>
+        @if (avisos(); as lista) {
+          <ul class="avisos" aria-live="polite" aria-relevant="additions">
+            @for (a of lista; track a.id) {
+              <li class="aviso" [attr.data-nivel]="a.data.nivel">
+                <ion-icon name="megaphone-outline" aria-hidden="true"></ion-icon>
+                <div>
+                  <h3>{{ a.data.titulo }}</h3>
+                  <p>{{ a.data.texto }}</p>
+                  @if (a.data.etiquetas?.length) {
+                    <p class="tags">@for (t of a.data.etiquetas; track t) { <span class="tag">#{{ t }}</span> }</p>
+                  }
+                </div>
+              </li>
+            } @empty {
+              <li class="muted">No hay avisos publicados.</li>
+            }
+          </ul>
+        } @else {
+          <p class="muted">Conectando…</p>
+        }
+      </section>
+    </div>
+  </div>
+</ion-content>

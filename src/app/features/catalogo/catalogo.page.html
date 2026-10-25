@@ -1,0 +1,86 @@
+<app-page-header title="Catálogo">
+  @if (auth.isAdmin()) {
+    <ion-button routerLink="/app/productos/nuevo" aria-label="Nuevo producto">
+      <ion-icon slot="start" name="add-outline" aria-hidden="true"></ion-icon>
+      <span class="hide-xs">Nuevo producto</span>
+    </ion-button>
+  }
+</app-page-header>
+
+<ion-content>
+  <div class="page">
+    <form class="filters" role="search" aria-label="Filtrar catálogo" (submit)="$event.preventDefault()">
+      @if (vista() === 'tarjetas') {
+        <label class="search-field" for="cat-search">
+          <span class="sr-only">Buscar producto por nombre, SKU o categoría</span>
+          <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+          <input id="cat-search" type="search" name="texto" placeholder="Buscar por nombre, SKU o categoría…"
+            [(ngModel)]="texto" autocomplete="off" />
+        </label>
+      }
+      <ion-select label="Categoría" labelPlacement="stacked" fill="outline" interface="popover" name="categoria"
+        [ngModel]="categoria()" (ngModelChange)="setCategoria($event)">
+        <ion-select-option value="todas">Todas</ion-select-option>
+        @for (c of categorias(); track c.id) { <ion-select-option [value]="c.id">{{ c.nombre }}</ion-select-option> }
+      </ion-select>
+      <ion-toggle name="disponibles" [(ngModel)]="soloDisponibles" labelPlacement="end">
+        Solo con stock
+      </ion-toggle>
+      <ion-segment [value]="vista()" (ionChange)="vista.set($any($event.detail.value))" aria-label="Modo de visualización">
+        <ion-segment-button value="tarjetas"><ion-icon name="grid-outline" aria-hidden="true"></ion-icon><ion-label>Tarjetas</ion-label></ion-segment-button>
+        <ion-segment-button value="tabla"><ion-icon name="list-outline" aria-hidden="true"></ion-icon><ion-label>Tabla</ion-label></ion-segment-button>
+      </ion-segment>
+    </form>
+
+    @if (error()) {
+      <app-empty-state icon="alert-circle-outline" tone="error" title="No se pudo cargar el catálogo" [message]="error()">
+        <ion-button (click)="data.reload()"><ion-icon slot="start" name="refresh-outline" aria-hidden="true"></ion-icon>Reintentar</ion-button>
+      </app-empty-state>
+    } @else if (vista() === 'tabla') {
+      <app-data-table caption="Inventario de productos" [columns]="columns" [rows]="filas()" [actions]="acciones()"
+        [(search)]="texto" [loading]="data.isLoading()" searchPlaceholder="Buscar producto"
+        [initialSort]="{ key: 'nombre', direction: 'asc' }" (action)="onAction($event)" />
+    } @else {
+      <p class="sr-only" role="status" aria-live="polite">{{ tarjetas().length }} productos encontrados</p>
+      <ul class="cards" aria-label="Productos">
+        @for (p of tarjetas(); track p.id) {
+          <li class="card">
+            <div class="card-top">
+              <span class="cat" [style.--cat]="p.categoria?.color">{{ p.categoria?.nombre }}</span>
+              <app-status-badge [value]="nivelStock(p)" />
+            </div>
+            <h2 class="card-title">{{ p.nombre }}</h2>
+            <p class="sku">SKU {{ p.sku }}</p>
+            @if (p.descripcion) { <p class="desc">{{ p.descripcion }}</p> }
+            <div class="card-bottom">
+              <span class="price">{{ formatCurrency(p.precio) }}</span>
+              <span class="stock">{{ p.stock }} uds.</span>
+            </div>
+            <ion-button expand="block" [disabled]="p.stock <= 0" (click)="anadir(p)" [attr.aria-label]="'Añadir ' + p.nombre + ' al pedido'">
+              <ion-icon slot="start" name="cart-outline" aria-hidden="true"></ion-icon>
+              Añadir
+              @if (cart.cantidadDe(p.id); as n) { <span class="in-cart">({{ n }} en pedido)</span> }
+            </ion-button>
+          </li>
+        } @empty {
+          @if (!data.isLoading()) {
+            <li class="full"><app-empty-state icon="cube-outline" title="Sin resultados" message="Prueba con otros filtros o términos de búsqueda." /></li>
+          }
+        }
+      </ul>
+    }
+  </div>
+</ion-content>
+
+@if (!cart.isEmpty()) {
+  <ion-footer>
+    <ion-toolbar>
+      <div class="cart-bar">
+        <span><strong>{{ cart.unidades() }}</strong> uds. · <strong>{{ formatCurrency(cart.total()) }}</strong></span>
+        <ion-button routerLink="/app/pedidos/nuevo">
+          Revisar pedido <ion-icon slot="end" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-toolbar>
+  </ion-footer>
+}

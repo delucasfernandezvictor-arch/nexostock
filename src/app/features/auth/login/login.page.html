@@ -1,0 +1,61 @@
+<ion-content>
+  <app-auth-layout title="Inicia sesión" subtitle="Accede al sistema de gestión de inventario y pedidos">
+    @if (expired()) {
+      <p class="form-alert info" role="status">
+        <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+        Tu sesión ha caducado. Vuelve a iniciar sesión.
+      </p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate aria-describedby="login-help">
+      <ion-input
+        class="field"
+        fill="outline"
+        label="Email corporativo"
+        labelPlacement="stacked"
+        type="email"
+        inputmode="email"
+        autocomplete="username"
+        placeholder="nombre@empresa.com"
+        formControlName="email"
+        [errorText]="errorText(form.controls.email.errors)"
+        required>
+        <ion-icon slot="start" name="mail-outline" aria-hidden="true"></ion-icon>
+      </ion-input>
+
+      <ion-input
+        class="field"
+        fill="outline"
+        label="Contraseña"
+        labelPlacement="stacked"
+        type="password"
+        autocomplete="current-password"
+        formControlName="password"
+        [errorText]="errorText(form.controls.password.errors)"
+        required>
+        <ion-icon slot="start" name="lock-closed-outline" aria-hidden="true"></ion-icon>
+        <ion-input-password-toggle slot="end" showLabel="Mostrar contraseña" hideLabel="Ocultar contraseña"></ion-input-password-toggle>
+      </ion-input>
+
+      @if (auth.error(); as error) {
+        <p class="form-alert error" role="alert">
+          <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>{{ error }}
+        </p>
+      }
+
+      <ion-button type="submit" expand="block" class="submit" [disabled]="auth.loading()">
+        @if (auth.loading()) {
+          <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
+          <span class="sr-only">Iniciando sesión…</span>
+        } @else {
+          <ion-icon slot="start" name="log-in-outline" aria-hidden="true"></ion-icon>
+          Entrar
+        }
+      </ion-button>
+    </form>
+
+    <p id="login-help" class="auth-foot">
+      ¿No tienes cuenta? <a routerLink="/registro">Crea una cuenta de usuario</a>
+    </p>
+  </app-auth-layout>
+</ion-content>

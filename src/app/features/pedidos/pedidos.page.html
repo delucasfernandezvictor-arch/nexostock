@@ -1,0 +1,80 @@
+<app-page-header [title]="auth.isAdmin() ? 'Pedidos de la empresa' : 'Mis pedidos'">
+  <ion-button routerLink="/app/pedidos/nuevo" aria-label="Nuevo pedido">
+    <ion-icon slot="icon-only" name="add-outline" aria-hidden="true"></ion-icon>
+  </ion-button>
+</app-page-header>
+
+<ion-content>
+  <div class="page">
+    <ion-segment [scrollable]="true" [value]="filtroEstado()" (ionChange)="setFiltro($event.detail.value)" aria-label="Filtrar por estado" class="estado-seg">
+      <ion-segment-button value="todos"><ion-label>Todos ({{ conteo()['todos'] ?? 0 }})</ion-label></ion-segment-button>
+      @for (e of estados; track e) {
+        <ion-segment-button [value]="e"><ion-label>{{ capitalize(e) }} ({{ conteo()[e] ?? 0 }})</ion-label></ion-segment-button>
+      }
+    </ion-segment>
+
+    @if (error()) {
+      <app-empty-state icon="alert-circle-outline" tone="error" title="No se pudieron cargar los pedidos" [message]="error()">
+        <ion-button (click)="data.reload()"><ion-icon slot="start" name="refresh-outline" aria-hidden="true"></ion-icon>Reintentar</ion-button>
+      </app-empty-state>
+    } @else {
+      <app-data-table caption="Listado de pedidos" [columns]="columns()" [rows]="filas()" [actions]="acciones"
+        [loading]="data.isLoading()" [clickableRows]="true" [pageSize]="12" searchPlaceholder="Buscar pedido, solicitante…"
+        [initialSort]="{ key: 'created_at', direction: 'desc' }"
+        (rowClick)="seleccionado.set($event)" (action)="onAction($event)"
+        emptyText="No hay pedidos con este filtro" />
+    }
+  </div>
+
+  <ion-modal [isOpen]="seleccionado() !== null" (didDismiss)="cerrar()" [attr.aria-labelledby]="'detalle-titulo'">
+    <ng-template>
+      @if (seleccionado(); as p) {
+        <ion-header>
+          <ion-toolbar color="primary">
+            <ion-title><h2 id="detalle-titulo" class="modal-title">Pedido {{ codigoPedido(p.id) }}</h2></ion-title>
+            <ion-buttons slot="end">
+              <ion-button (click)="cerrar()" aria-label="Cerrar detalle"><ion-icon slot="icon-only" name="close-outline" aria-hidden="true"></ion-icon></ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content class="ion-padding">
+          <dl class="meta">
+            <div><dt>Estado</dt><dd><app-status-badge [value]="p.estado" /></dd></div>
+            <div><dt>Prioridad</dt><dd><app-status-badge [value]="p.prioridad" /></dd></div>
+            <div><dt>Fecha</dt><dd>{{ formatDateTime(p.created_at) }}</dd></div>
+            <div><dt>Solicitante</dt><dd>{{ p.usuario_nombre || p.usuario_email }}</dd></div>
+            <div><dt>Total</dt><dd class="total">{{ formatCurrency(p.total) }}</dd></div>
+            @if (p.notas) { <div class="wide"><dt>Notas</dt><dd>{{ p.notas }}</dd></div> }
+          </dl>
+
+          <h3>Líneas del pedido</h3>
+          @if (lineas.isLoading()) {
+            <p class="muted"><ion-spinner name="dots" aria-hidden="true"></ion-spinner> Cargando líneas…</p>
+          } @else {
+            <table class="lineas">
+              <caption class="sr-only">Productos del pedido {{ codigoPedido(p.id) }}</caption>
+              <thead><tr><th scope="col">Producto</th><th scope="col" class="num">Cant.</th><th scope="col" class="num">Precio</th><th scope="col" class="num">Subtotal</th></tr></thead>
+              <tbody>
+                @for (l of lineasValue(); track l.linea_id) {
+                  <tr><th scope="row">{{ l.producto }} <span class="sku">{{ l.sku }}</span></th><td class="num">{{ l.cantidad }}</td><td class="num">{{ formatCurrency(l.precio_unitario) }}</td><td class="num">{{ formatCurrency(l.subtotal) }}</td></tr>
+                }
+              </tbody>
+            </table>
+          }
+
+          @if (transiciones().length) {
+            <h3>Acciones</h3>
+            <div class="acciones">
+              @for (t of transiciones(); track t) {
+                <ion-button [color]="t === 'cancelado' ? 'danger' : 'primary'" [fill]="t === 'cancelado' ? 'outline' : 'solid'"
+                  [disabled]="cambiando()" (click)="cambiarEstado(t)">
+                  {{ etiquetaTransicion(t) }}
+                </ion-button>
+              }
+            </div>
+          }
+        </ion-content>
+      }
+    </ng-template>
+  </ion-modal>
+</ion-content>

@@ -1,0 +1,135 @@
+/* Core CSS requerido por los componentes de Ionic */
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/flex-utils.css';
+@import '@ionic/angular/css/text-alignment.css';
+
+/* Modo oscuro controlado por clase (UiStore decide según preferencia / sistema) */
+@import '@ionic/angular/css/palettes/dark.class.css';
+
+// -----------------------------------------------------------------------------
+//  Base accesible
+// -----------------------------------------------------------------------------
+html {
+  // Tamaño base en %, escalable por el usuario y por la página de Accesibilidad
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--ion-font-family);
+  line-height: 1.5;
+  background: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+a { color: var(--app-text-primary); text-underline-offset: 0.15em; font-weight: 600; }
+
+// Foco siempre visible al navegar con teclado (WCAG 2.4.7 / 2.4.11)
+:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; }
+ion-button:focus-visible, ion-item:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; }
+
+// Texto solo para lectores de pantalla
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+// -----------------------------------------------------------------------------
+//  Layout común de páginas (mobile-first)
+// -----------------------------------------------------------------------------
+.page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  &.narrow { max-width: 860px; }
+  &.wide { max-width: 1600px; }
+}
+
+@media (min-width: 768px) {
+  .page { padding: 1.5rem; }
+}
+
+.section-title { margin: 0.5rem 0 0.75rem; font-size: 1.15rem; font-weight: 700; }
+
+.gap-row { row-gap: 1rem; margin: 0 -0.5rem; ion-col { padding: 0 0.5rem; } }
+
+.panel {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: 0.9rem;
+  background: var(--app-surface);
+  > h2 { margin-top: 0; font-size: 1.1rem; }
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  h2 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+}
+
+.two-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+  > .panel { margin-bottom: 0; }
+}
+
+@media (min-width: 992px) {
+  .two-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.muted { color: var(--app-muted); }
+
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--app-text-success);
+  &[data-status='error'] { color: var(--app-text-danger); }
+  &[data-status='connecting'] { color: var(--app-muted); }
+}
+
+// Cabeceras de Ionic: el h1 dentro de ion-title hereda el color de la toolbar
+ion-toolbar h1, ion-toolbar h2 { color: inherit; }
+
+// Botones de icono con área táctil mínima de 44x44 (WCAG 2.5.8)
+ion-button[size='small'] { min-height: 2.75rem; }
+
+// Segmentos: el texto no seleccionado de Ionic no alcanza 4,5:1 por defecto
+ion-segment-button {
+  --color: var(--app-muted);
+  --color-checked: var(--app-text-primary);
+  --indicator-color: var(--app-text-primary);
+  font-weight: 600;
+}
+
+// Inputs: etiquetas con buen contraste
+ion-input, ion-select, ion-textarea { --placeholder-color: var(--app-muted); --placeholder-opacity: 1; }
+ion-input .helper-text, ion-select .helper-text { color: var(--app-muted); }
+
+// Alto contraste: refuerza los bordes de los campos
+.high-contrast ion-input, .high-contrast ion-select, .high-contrast ion-textarea { --border-color: var(--app-border-strong); }

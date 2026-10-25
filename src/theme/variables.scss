@@ -1,0 +1,168 @@
+// =============================================================================
+//  NexoStock · Tokens de diseño
+//  Todos los pares texto/fondo cumplen contraste WCAG AA (≥ 4,5:1).
+//  Ver docs/ACCESIBILIDAD.md para la tabla de contrastes verificados.
+// =============================================================================
+
+:root {
+  // --- Paleta Ionic (color de marca y semánticos con contraste AA sobre blanco)
+  --ion-color-primary: #2f3fb8;
+  --ion-color-primary-rgb: 47, 63, 184;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #2937a2;
+  --ion-color-primary-tint: #4452bf;
+
+  --ion-color-secondary: #0b6e69;
+  --ion-color-secondary-rgb: 11, 110, 105;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #0a615c;
+  --ion-color-secondary-tint: #237d78;
+
+  --ion-color-success: #15803d;
+  --ion-color-success-rgb: 21, 128, 61;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #127136;
+  --ion-color-success-tint: #2c8d50;
+
+  --ion-color-warning: #a64b05;
+  --ion-color-warning-rgb: 166, 75, 5;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-contrast-rgb: 255, 255, 255;
+  --ion-color-warning-shade: #924204;
+  --ion-color-warning-tint: #af5d1e;
+
+  --ion-color-danger: #b91c1c;
+  --ion-color-danger-rgb: 185, 28, 28;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #a31919;
+  --ion-color-danger-tint: #c03333;
+
+  --ion-color-medium: #5b6170;
+  --ion-color-medium-rgb: 91, 97, 112;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #505563;
+  --ion-color-medium-tint: #6b717e;
+
+  --ion-font-family: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ion-background-color: #f4f6fb;
+  --ion-background-color-rgb: 244, 246, 251;
+  --ion-text-color: #1e2230;
+  --ion-text-color-rgb: 30, 34, 48;
+
+  // --- Tokens propios de la aplicación
+  --app-surface: #ffffff;
+  --app-surface-2: #f7f8fc;
+  --app-hover: #eef0fb;
+  --app-border: #dde1ec;
+  --app-border-strong: #8a90a0;
+  --app-muted: #545b6b;          // 6,9:1 sobre blanco
+  --app-focus: #2f3fb8;
+  --app-text-primary: #2f3fb8;
+  --app-text-success: #166534;
+  --app-text-danger: #b91c1c;
+
+  --app-badge-neutral-bg: #eef0f4; --app-badge-neutral-fg: #3f4555; --app-badge-neutral-bd: #d4d8e2;
+  --app-badge-info-bg: #e7f0fd;    --app-badge-info-fg: #1d4f91;    --app-badge-info-bd: #c4d8f6;
+  --app-badge-primary-bg: #e9ebfb; --app-badge-primary-fg: #2a379e; --app-badge-primary-bd: #cdd2f4;
+  --app-badge-success-bg: #e5f5ea; --app-badge-success-fg: #14632f; --app-badge-success-bd: #bfe3cb;
+  --app-badge-warning-bg: #fdf1e3; --app-badge-warning-fg: #8a3d04; --app-badge-warning-bd: #f4d3ad;
+  --app-badge-danger-bg: #fdeaea;  --app-badge-danger-fg: #9b1818;  --app-badge-danger-bd: #f5c6c6;
+
+  --app-chart-1: #2f3fb8;
+  --app-chart-2: #0b7a75;
+  --app-chart-3: #c2620a;
+  --app-chart-4: #be185d;
+  --app-chart-5: #7c3aed;
+  --app-chart-6: #15803d;
+}
+
+// --- Modo oscuro (clase aplicada por UiStore según preferencia o sistema)
+:root.ion-palette-dark {
+  --ion-color-primary: #8b98ff;
+  --ion-color-primary-rgb: 139, 152, 255;
+  --ion-color-primary-contrast: #0d1033;
+  --ion-color-primary-contrast-rgb: 13, 16, 51;
+  --ion-color-primary-shade: #7a86e0;
+  --ion-color-primary-tint: #97a2ff;
+
+  --ion-color-success: #4ade80;
+  --ion-color-success-rgb: 74, 222, 128;
+  --ion-color-success-contrast: #052e16;
+  --ion-color-success-contrast-rgb: 5, 46, 22;
+  --ion-color-success-shade: #41c371;
+  --ion-color-success-tint: #5ce18d;
+
+  --ion-color-warning: #fbbf24;
+  --ion-color-warning-rgb: 251, 191, 36;
+  --ion-color-warning-contrast: #2b1a00;
+  --ion-color-warning-contrast-rgb: 43, 26, 0;
+  --ion-color-warning-shade: #dda820;
+  --ion-color-warning-tint: #fbc53a;
+
+  --ion-color-danger: #f87171;
+  --ion-color-danger-rgb: 248, 113, 113;
+  --ion-color-danger-contrast: #2d0606;
+  --ion-color-danger-contrast-rgb: 45, 6, 6;
+  --ion-color-danger-shade: #da6363;
+  --ion-color-danger-tint: #f97f7f;
+
+  --ion-color-medium: #a3a9b8;
+  --ion-color-medium-rgb: 163, 169, 184;
+  --ion-color-medium-contrast: #0f1115;
+  --ion-color-medium-contrast-rgb: 15, 17, 21;
+  --ion-color-medium-shade: #8f95a2;
+  --ion-color-medium-tint: #acb2bf;
+
+  --ion-background-color: #0f121a;
+  --ion-background-color-rgb: 15, 18, 26;
+  --ion-text-color: #e8eaf2;
+  --ion-text-color-rgb: 232, 234, 242;
+  --ion-toolbar-background: #171b26;
+  --ion-item-background: #171b26;
+  --ion-card-background: #171b26;
+
+  --app-surface: #171b26;
+  --app-surface-2: #1d2230;
+  --app-hover: #232a3b;
+  --app-border: #2d3446;
+  --app-border-strong: #7a8195;
+  --app-muted: #a9afbf;
+  --app-focus: #a5b0ff;
+  --app-text-primary: #a5b0ff;
+  --app-text-success: #6ee7a0;
+  --app-text-danger: #fca5a5;
+
+  --app-badge-neutral-bg: #252b3a; --app-badge-neutral-fg: #d3d7e2; --app-badge-neutral-bd: #3a4255;
+  --app-badge-info-bg: #13294a;    --app-badge-info-fg: #a9cbff;    --app-badge-info-bd: #24426e;
+  --app-badge-primary-bg: #1f2557; --app-badge-primary-fg: #c3caff; --app-badge-primary-bd: #343c80;
+  --app-badge-success-bg: #0f2e1c; --app-badge-success-fg: #86efac; --app-badge-success-bd: #1d4d31;
+  --app-badge-warning-bg: #3a2408; --app-badge-warning-fg: #fcd38d; --app-badge-warning-bd: #5c3a10;
+  --app-badge-danger-bg: #3b1212;  --app-badge-danger-fg: #fecaca;  --app-badge-danger-bd: #602020;
+
+  --app-chart-1: #8b98ff;
+  --app-chart-2: #2dd4bf;
+  --app-chart-3: #fb923c;
+  --app-chart-4: #f472b6;
+  --app-chart-5: #c4b5fd;
+  --app-chart-6: #4ade80;
+}
+
+// --- Alto contraste: bordes y textos secundarios reforzados
+:root.high-contrast {
+  --app-border: #5b6170;
+  --app-border-strong: #1e2230;
+  --app-muted: #2c3140;
+  --ion-background-color: #ffffff;
+}
+:root.high-contrast.ion-palette-dark {
+  --app-border: #9aa1b3;
+  --app-border-strong: #ffffff;
+  --app-muted: #e2e5ee;
+  --ion-background-color: #000000;
+  --app-surface: #0a0c12;
+}

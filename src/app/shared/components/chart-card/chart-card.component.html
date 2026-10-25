@@ -1,0 +1,42 @@
+<section class="chart-card" [attr.aria-labelledby]="uid + '-title'">
+  <header class="chart-head">
+    <div>
+      <h3 [id]="uid + '-title'">{{ title() }}</h3>
+      @if (subtitle()) { <p>{{ subtitle() }}</p> }
+    </div>
+    <button type="button" class="link-btn" (click)="toggleTable()" [attr.aria-expanded]="showTable()" [attr.aria-controls]="uid + '-table'">
+      {{ showTable() ? 'Ver gráfico' : 'Ver datos' }}
+    </button>
+  </header>
+
+  <div class="chart-body" [style.height.px]="height()" [hidden]="showTable()">
+    @if (loading()) {
+      <ion-skeleton-text [animated]="true" class="chart-skeleton"></ion-skeleton-text>
+    }
+    <canvas #canvas role="img" [attr.aria-label]="summary()" [hidden]="loading()"></canvas>
+  </div>
+
+  <div [id]="uid + '-table'" class="chart-table" [hidden]="!showTable()">
+    <table>
+      <caption class="sr-only">Datos de {{ title() }}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Elemento</th>
+          @for (s of series(); track s.label) { <th scope="col" class="num">{{ s.label }}</th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of tableRows(); track r.label) {
+          <tr>
+            <th scope="row">
+              <button type="button" class="link-btn" (click)="select(r.index)">{{ r.label }}</button>
+            </th>
+            @for (v of r.values; track $index) { <td class="num">{{ fmt(v) }}</td> }
+          </tr>
+        } @empty {
+          <tr><td [attr.colspan]="series().length + 1">Sin datos</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
