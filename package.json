@@ -17,9 +17,9 @@
     "test": "ng test",
     "test:ci": "npm run config && ng test --watch=false",
     "lint": "ng lint",
-    "docs": "compodoc -p tsconfig.doc.json -d documentation --name \"NexoStock · Documentación técnica\" --language es-ES --hideGenerator",
+    "docs": "compodoc -p tsconfig.doc.json -d documentation --includes docs --includesName \"Manual de usuario\" --name \"NexoStock · Documentación técnica\" --language es-ES --hideGenerator",
     "docs:serve": "compodoc -p tsconfig.doc.json -d documentation --language es-ES -s",
-    "docs:publish": "compodoc -p tsconfig.doc.json -d www/docs --name \"NexoStock · Documentación técnica\" --language es-ES --hideGenerator",
+    "docs:publish": "compodoc -p tsconfig.doc.json -d www/docs --includes docs --includesName \"Manual de usuario\" --name \"NexoStock · Documentación técnica\" --language es-ES --hideGenerator",
     "vercel-build": "npm run test:ci && npm run build && npm run docs:publish"
   },
   "dependencies": {

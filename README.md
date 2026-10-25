@@ -10,7 +10,7 @@ Aplicación de gestión empresarial **multiplataforma (PWA / híbrida)** para co
 |---|---|
 | **Producción** | <https://nexostock-amber.vercel.app> |
 | **Documentación técnica (Compodoc)** | <https://nexostock-amber.vercel.app/docs/index.html> |
-| **Manual de usuario** | [docs/MANUAL_USUARIO.md](docs/MANUAL_USUARIO.md) y pantalla *Ayuda* dentro de la app |
+| **Manual de usuario** | [En la documentación web](https://nexostock-amber.vercel.app/docs/additional-documentation/manual-de-usuario.html) · [En GitHub (Markdown)](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/docs/MANUAL_USUARIO.md) · pantalla *Ayuda* dentro de la app |
 | **Repositorio** | <https://github.com/delucasfernandezvictor-arch/nexostock> |
 | **Credenciales de prueba** | Se entregan en el PDF de la actividad (no se publican en el repositorio) |
 
@@ -77,7 +77,7 @@ Arquitectura **MVVM** con separación estricta en capas y flujo de datos unidire
 | Concurrencia | `forkJoin` (dashboard, informes, inicio), `retry` con *backoff* exponencial, `switchMap` + *debounce* en validaciones | Fusión de la carga inicial con los eventos en vivo, Presence |
 | Lógica de negocio | Funciones **RPC transaccionales**: `crear_pedido` (bloqueo `FOR UPDATE`, control de stock), `cambiar_estado_pedido`, `cambiar_rol`, `email_disponible` | Los *triggers* generan documentos de actividad en cada cambio relevante |
 
-El esquema completo está en [`supabase/schema.sql`](supabase/schema.sql) y los datos sintéticos en [`supabase/seed.sql`](supabase/seed.sql).
+El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/supabase/schema.sql) y los datos sintéticos en [`supabase/seed.sql`](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/supabase/seed.sql).
 
 ## Seguridad y control de acceso
 
@@ -92,18 +92,18 @@ El esquema completo está en [`supabase/schema.sql`](supabase/schema.sql) y los 
 
 | Paso | Implementación |
 |---|---|
-| **1.1** Navegación + lazy loading + guards por rol | Side menu con `ion-split-pane` ([shell](src/app/layout/shell/)) · [app.routes.ts](src/app/app.routes.ts) · [features.routes.ts](src/app/features/features.routes.ts) · [auth.guards.ts](src/app/core/guards/auth.guards.ts) |
-| **1.2** Formularios, data binding, validación asíncrona | [Registro](src/app/features/auth/registro/) (email único vía RPC) · [Producto](src/app/features/admin/producto-form/) (SKU único) · [Nuevo pedido](src/app/features/pedidos/) (`FormArray`) · two-way `[(ngModel)]` y `[(search)]` con `model()` · [validators.ts](src/app/core/validators/validators.ts) |
-| **2.1** ≥ 2 componentes visuales | [`app-data-table`](src/app/shared/components/data-table/) · [`app-chart-card`](src/app/shared/components/chart-card/) · [`app-kpi-card`](src/app/shared/components/kpi-card/) · [`app-activity-feed`](src/app/shared/components/activity-feed/) · `app-status-badge` · `app-empty-state` · `app-page-header` |
+| **1.1** Navegación + lazy loading + guards por rol | Side menu con `ion-split-pane` ([shell](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/layout/shell)) · [app.routes.ts](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/src/app/app.routes.ts) · [features.routes.ts](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/src/app/features/features.routes.ts) · [auth.guards.ts](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/src/app/core/guards/auth.guards.ts) |
+| **1.2** Formularios, data binding, validación asíncrona | [Registro](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/features/auth/registro) (email único vía RPC) · [Producto](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/features/admin/producto-form) (SKU único) · [Nuevo pedido](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/features/pedidos) (`FormArray`) · two-way `[(ngModel)]` y `[(search)]` con `model()` · [validators.ts](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/src/app/core/validators/validators.ts) |
+| **2.1** ≥ 2 componentes visuales | [`app-data-table`](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/shared/components/data-table) · [`app-chart-card`](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/shared/components/chart-card) · [`app-kpi-card`](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/shared/components/kpi-card) · [`app-activity-feed`](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/shared/components/activity-feed) · `app-status-badge` · `app-empty-state` · `app-page-header` |
 | **2.2** Inputs / Outputs | `input()`, `model()` y `output()`: `rowClick`, `action`, `sortChange`, `segmentSelect`, `selected`, `itemSelect` |
-| **3.1** Asincronía SQL + NoSQL | [sql-api.service.ts](src/app/core/services/sql-api.service.ts) · [realtime-docs.service.ts](src/app/core/services/realtime-docs.service.ts) · `forkJoin`, `Promise.all`, `rxResource` |
-| **3.2** Dashboard con gráficos | [Cuadro de mando](src/app/features/admin/dashboard/): Chart.js, filtros en tiempo real, *drill-down*, KPIs con tendencia |
-| **3.3** Exportación PDF y CSV | [export.service.ts](src/app/core/services/export.service.ts): PDF maquetado con jsPDF y autotable, CSV RFC 4180 · [Informes](src/app/features/informes/) |
+| **3.1** Asincronía SQL + NoSQL | [sql-api.service.ts](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/src/app/core/services/sql-api.service.ts) · [realtime-docs.service.ts](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/src/app/core/services/realtime-docs.service.ts) · `forkJoin`, `Promise.all`, `rxResource` |
+| **3.2** Dashboard con gráficos | [Cuadro de mando](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/features/admin/dashboard): Chart.js, filtros en tiempo real, *drill-down*, KPIs con tendencia |
+| **3.3** Exportación PDF y CSV | [export.service.ts](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/src/app/core/services/export.service.ts): PDF maquetado con jsPDF y autotable, CSV RFC 4180 · [Informes](https://github.com/delucasfernandezvictor-arch/nexostock/tree/main/src/app/features/informes) |
 | **4.1** Responsive mobile-first | CSS Grid y Flexbox, `ion-grid`, tablas que se convierten en tarjetas en móvil |
 | **4.2** WCAG / WAI-ARIA / teclado | Ver [Accesibilidad y calidad](#accesibilidad-y-calidad) |
 | **5.1** Git Flow | Ramas `main`, `develop`, `feature/*`, `release/*` con *merge commits* (ver historial) |
-| **5.2** Documentación | Compodoc (`npm run docs`, publicada en `/docs`) · [Manual de usuario](docs/MANUAL_USUARIO.md) · ayuda integrada |
-| **5.3** Despliegue + CI | [ci.yml](.github/workflows/ci.yml) · [vercel.json](vercel.json): Vercel no despliega si fallan los tests |
+| **5.2** Documentación | Compodoc (`npm run docs`, publicada en `/docs`) · [Manual de usuario](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/docs/MANUAL_USUARIO.md) · ayuda integrada |
+| **5.3** Despliegue + CI | [ci.yml](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/.github/workflows/ci.yml) · [vercel.json](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/vercel.json): Vercel no despliega si fallan los tests |
 
 ## Puesta en marcha
 
@@ -144,7 +144,7 @@ El historial (`git log --graph --oneline --all`) muestra cada rama de caracterí
 
 ## Despliegue y CI/CD
 
-- **GitHub Actions** ([ci.yml](.github/workflows/ci.yml)) se ejecuta en cada push y en cada PR. Pasa lint, tests, build de producción y Compodoc, y guarda la documentación como artefacto.
+- **GitHub Actions** ([ci.yml](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/.github/workflows/ci.yml)) se ejecuta en cada push y en cada PR. Pasa lint, tests, build de producción y Compodoc, y guarda la documentación como artefacto.
 - **Vercel** está conectado al repositorio: cada push a `main` despliega a producción y cada PR genera un *preview*. Su comando de build es `npm run vercel-build`, que **ejecuta los tests primero**: si fallan, **el despliegue se bloquea**.
 - Variables en Vercel (*Settings › Environment Variables*): `SUPABASE_URL` y `SUPABASE_ANON_KEY`.
 - La documentación de Compodoc se publica junto a la app en `/docs/index.html`.
