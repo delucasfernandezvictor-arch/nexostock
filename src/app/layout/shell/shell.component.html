@@ -1,0 +1,70 @@
+<nav class="skip-nav" aria-label="Accesos directos">
+  <a class="skip-link" href="#main" (click)="skipToContent($event)">Saltar al contenido principal</a>
+</nav>
+
+<ion-split-pane contentId="main" when="lg">
+  <ion-menu contentId="main" menuId="principal" type="overlay">
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>
+          <span class="brand"><span class="brand-mark" aria-hidden="true">N</span>NexoStock</span>
+        </ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <section class="user-card" aria-label="Usuario conectado">
+        <span class="avatar" aria-hidden="true">{{ auth.initials() }}</span>
+        <span class="user-info">
+          <strong>{{ auth.displayName() }}</strong>
+          <span class="user-email">{{ auth.profile()?.email }}</span>
+          @if (auth.role(); as role) { <app-status-badge [value]="role" /> }
+        </span>
+      </section>
+
+      <nav aria-label="Navegación principal">
+        @for (section of menu(); track section.title; let s = $index) {
+          <h2 class="menu-section" [id]="'menu-sec-' + s">{{ section.title }}</h2>
+          <ul class="menu-list" [attr.aria-labelledby]="'menu-sec-' + s">
+            @for (entry of section.entries; track entry.url) {
+              <li>
+                <ion-menu-toggle [autoHide]="false">
+                  <ion-item
+                    lines="none"
+                    button
+                    [detail]="false"
+                    [routerLink]="entry.url"
+                    routerLinkActive="active"
+                    ariaCurrentWhenActive="page"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    routerDirection="root">
+                    <ion-icon slot="start" [name]="entry.icon" aria-hidden="true"></ion-icon>
+                    <ion-label>{{ entry.label }}</ion-label>
+                    @if (entry.badge && entry.badge() > 0) {
+                      <ion-badge slot="end" color="primary">
+                        {{ entry.badge() }}<span class="sr-only"> unidades en el carrito</span>
+                      </ion-badge>
+                    }
+                  </ion-item>
+                </ion-menu-toggle>
+              </li>
+            }
+          </ul>
+        }
+      </nav>
+
+      <div class="menu-footer">
+        <ion-button fill="outline" size="small" (click)="toggleTheme()" [attr.aria-pressed]="isDark()">
+          <ion-icon slot="start" [name]="isDark() ? 'sunny-outline' : 'moon-outline'" aria-hidden="true"></ion-icon>
+          {{ isDark() ? 'Modo claro' : 'Modo oscuro' }}
+        </ion-button>
+        <ion-button fill="solid" color="danger" size="small" (click)="logout()">
+          <ion-icon slot="start" name="log-out-outline" aria-hidden="true"></ion-icon>
+          Cerrar sesión
+        </ion-button>
+      </div>
+    </ion-content>
+  </ion-menu>
+
+  <ion-router-outlet id="main"></ion-router-outlet>
+</ion-split-pane>

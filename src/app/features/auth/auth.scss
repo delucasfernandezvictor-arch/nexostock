@@ -1,0 +1,43 @@
+.field { margin-bottom: 1rem; }
+.submit { margin-top: 0.5rem; min-height: 3rem; font-weight: 700; }
+
+.form-alert {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+  font-size: 0.9375rem;
+  ion-icon { flex: none; font-size: 1.25rem; }
+  &.error { background: var(--app-badge-danger-bg); color: var(--app-badge-danger-fg); border: 1px solid var(--app-badge-danger-bd); }
+  &.info { background: var(--app-badge-info-bg); color: var(--app-badge-info-fg); border: 1px solid var(--app-badge-info-bd); }
+  &.success { background: var(--app-badge-success-bg); color: var(--app-badge-success-fg); border: 1px solid var(--app-badge-success-bd); }
+}
+
+.auth-foot { margin: 1.25rem 0 0; text-align: center; color: var(--app-muted); }
+
+.checks {
+  list-style: none;
+  margin: -0.5rem 0 1rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+  li { display: flex; align-items: center; gap: 0.3rem; color: var(--app-muted); }
+  li.ok { color: var(--app-text-success); }
+}
+
+.async-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: -0.6rem 0 1rem;
+  font-size: 0.8125rem;
+  min-height: 1.25rem;
+  color: var(--app-muted);
+  ion-spinner { width: 1rem; height: 1rem; }
+  &.ok { color: var(--app-text-success); }
+  &.ko { color: var(--app-text-danger); }
+}

@@ -1,0 +1,76 @@
+<ion-content>
+  <app-auth-layout title="Crea tu cuenta" subtitle="Alta como usuario estándar. Un administrador puede ampliar tus permisos.">
+    @if (confirmationSent()) {
+      <div class="form-alert success" role="status">
+        <ion-icon name="mail-open-outline" aria-hidden="true"></ion-icon>
+        <span>Te hemos enviado un email de confirmación. Ábrelo para activar tu cuenta y después <a routerLink="/login">inicia sesión</a>.</span>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <ion-input class="field" fill="outline" label="Nombre y apellidos" labelPlacement="stacked" autocomplete="name"
+          formControlName="nombre" [errorText]="errorText(form.controls.nombre.errors)" required></ion-input>
+
+        <ion-input class="field" fill="outline" label="Email corporativo" labelPlacement="stacked" type="email" inputmode="email"
+          autocomplete="email" formControlName="email" [errorText]="emailError()" required
+          aria-describedby="email-status"></ion-input>
+        <p id="email-status" class="async-status" aria-live="polite"
+          [class.ok]="emailStatus() === 'VALID' && form.controls.email.value"
+          [class.ko]="form.controls.email.hasError('emailTaken')">
+          @switch (emailStatus()) {
+            @case ('PENDING') { <ion-spinner name="dots" aria-hidden="true"></ion-spinner> Comprobando disponibilidad… }
+            @case ('VALID') {
+              @if (form.controls.email.value) { <ion-icon name="checkmark-circle" aria-hidden="true"></ion-icon> Email disponible }
+            }
+            @default {
+              @if (form.controls.email.hasError('emailTaken')) { <ion-icon name="close-circle" aria-hidden="true"></ion-icon> Email ya registrado }
+            }
+          }
+        </p>
+
+        <ion-select class="field" fill="outline" label="Departamento" labelPlacement="stacked" interface="popover"
+          formControlName="departamento" placeholder="Selecciona tu departamento"
+          [errorText]="errorText(form.controls.departamento.errors)">
+          @for (d of departamentos; track d) { <ion-select-option [value]="d">{{ d }}</ion-select-option> }
+        </ion-select>
+
+        <ion-input class="field" fill="outline" label="Contraseña" labelPlacement="stacked" type="password"
+          autocomplete="new-password" formControlName="password" aria-describedby="pwd-rules"
+          [errorText]="errorText(form.controls.password.errors)" required>
+          <ion-input-password-toggle slot="end" showLabel="Mostrar contraseña" hideLabel="Ocultar contraseña"></ion-input-password-toggle>
+        </ion-input>
+        <ul id="pwd-rules" class="checks" aria-label="Requisitos de la contraseña">
+          @for (c of checks(); track c.label) {
+            <li [class.ok]="c.ok">
+              <ion-icon [name]="c.ok ? 'checkmark-circle' : 'ellipse-outline'" aria-hidden="true"></ion-icon>
+              {{ c.label }}<span class="sr-only">{{ c.ok ? ': cumplido' : ': pendiente' }}</span>
+            </li>
+          }
+        </ul>
+
+        <ion-input class="field" fill="outline" label="Repite la contraseña" labelPlacement="stacked" type="password"
+          autocomplete="new-password" formControlName="confirm" [errorText]="confirmError()"
+          [class.ion-invalid]="form.hasError('mismatch')" [class.ion-touched]="form.controls.confirm.touched" required>
+          <ion-input-password-toggle slot="end" showLabel="Mostrar contraseña" hideLabel="Ocultar contraseña"></ion-input-password-toggle>
+        </ion-input>
+
+        <ion-checkbox formControlName="acepta" labelPlacement="end" justify="start" class="field"
+          [errorText]="'Debes aceptar la política de uso de datos'">
+          Acepto la política de uso de datos de la empresa
+        </ion-checkbox>
+
+        @if (auth.error(); as error) {
+          <p class="form-alert error" role="alert"><ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>{{ error }}</p>
+        }
+
+        <ion-button type="submit" expand="block" class="submit" [disabled]="auth.loading() || emailStatus() === 'PENDING'">
+          @if (auth.loading()) {
+            <ion-spinner name="crescent" aria-hidden="true"></ion-spinner><span class="sr-only">Creando cuenta…</span>
+          } @else {
+            <ion-icon slot="start" name="person-add-outline" aria-hidden="true"></ion-icon> Crear cuenta
+          }
+        </ion-button>
+      </form>
+    }
+    <p class="auth-foot">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+  </app-auth-layout>
+</ion-content>
