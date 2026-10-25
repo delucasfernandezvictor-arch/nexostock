@@ -1,0 +1,112 @@
+<app-page-header title="Cuadro de mando">
+  <ion-button (click)="exportar('csv')" aria-label="Exportar informe de ventas en CSV" title="Exportar CSV">
+    <ion-icon slot="icon-only" name="download-outline" aria-hidden="true"></ion-icon>
+  </ion-button>
+  <ion-button (click)="exportar('pdf')" aria-label="Exportar informe de ventas en PDF" title="Exportar PDF">
+    <ion-icon slot="icon-only" name="document-outline" aria-hidden="true"></ion-icon>
+  </ion-button>
+</app-page-header>
+
+<ion-content>
+  <div class="page wide">
+    <!-- Filtros en tiempo real -->
+    <section class="filters panel" aria-labelledby="filtros-title">
+      <h2 id="filtros-title" class="sr-only">Filtros del cuadro de mando</h2>
+      <ion-segment [value]="meses()" (ionChange)="setMeses($event.detail.value)" aria-label="Periodo">
+        <ion-segment-button [value]="3"><ion-label>3 meses</ion-label></ion-segment-button>
+        <ion-segment-button [value]="6"><ion-label>6 meses</ion-label></ion-segment-button>
+        <ion-segment-button [value]="12"><ion-label>12 meses</ion-label></ion-segment-button>
+      </ion-segment>
+      <ion-select label="Categoría" labelPlacement="stacked" fill="outline" interface="popover" [(ngModel)]="categoriaId" placeholder="Todas">
+        <ion-select-option [value]="null">Todas</ion-select-option>
+        @for (c of categorias(); track c.id) { <ion-select-option [value]="c.id">{{ c.nombre }}</ion-select-option> }
+      </ion-select>
+      <ion-select label="Estado" labelPlacement="stacked" fill="outline" interface="popover" [(ngModel)]="estado" placeholder="Todos">
+        <ion-select-option [value]="null">Todos</ion-select-option>
+        @for (e of estados; track e) { <ion-select-option [value]="e">{{ capitalize(e) }}</ion-select-option> }
+      </ion-select>
+      <div class="filter-info">
+        <p aria-live="polite"><ion-icon name="filter-outline" aria-hidden="true"></ion-icon> {{ filtroTexto() }}</p>
+        @if (hayFiltros()) {
+          <ion-button fill="clear" size="small" (click)="limpiarFiltros()">
+            <ion-icon slot="start" name="close-circle-outline" aria-hidden="true"></ion-icon> Quitar filtros
+          </ion-button>
+        }
+      </div>
+    </section>
+
+    @if (error()) {
+      <app-empty-state icon="alert-circle-outline" tone="error" title="No se pudieron cargar las métricas" [message]="error()">
+        <ion-button (click)="data.reload()"><ion-icon slot="start" name="refresh-outline" aria-hidden="true"></ion-icon>Reintentar</ion-button>
+      </app-empty-state>
+    }
+
+    <!-- KPIs -->
+    <h2 class="sr-only">Indicadores clave</h2>
+    <ion-grid class="ion-no-padding">
+      <ion-row class="gap-row">
+        <ion-col size="12" sizeSm="6" sizeLg="3">
+          <app-kpi-card label="Facturación" [value]="kpi().facturacion" format="currency" icon="cash-outline" tone="success"
+            [trend]="kpi().trendFacturacion" [hint]="kpi().comparable ? 'Frente al periodo anterior' : 'Sin histórico previo para comparar'" [loading]="loading()" />
+        </ion-col>
+        <ion-col size="12" sizeSm="6" sizeLg="3">
+          <app-kpi-card label="Pedidos" [value]="kpi().pedidos" icon="receipt-outline" [trend]="kpi().trendPedidos"
+            [hint]="formatCurrency(kpi().ticketMedio) + ' de ticket medio'" [loading]="loading()" />
+        </ion-col>
+        <ion-col size="12" sizeSm="6" sizeLg="3">
+          <app-kpi-card label="Cancelados" [value]="kpi().cancelados" icon="close-circle-outline" tone="danger" [trend]="kpi().trendCancelados"
+            [invertTrend]="true" [interactive]="true" [active]="estado() === 'cancelado'" (selected)="toggleEstado('cancelado')"
+            hint="Pulsa para filtrar" [loading]="loading()" />
+        </ion-col>
+        <ion-col size="12" sizeSm="6" sizeLg="3">
+          <app-kpi-card label="Stock crítico" [value]="criticos().length" icon="warning-outline" tone="warning"
+            [hint]="realtime.online().length === 1 ? '1 usuario conectado ahora' : realtime.online().length + ' usuarios conectados ahora'" [loading]="loading()" />
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Gráficos -->
+    <div class="charts">
+      <div class="span-2">
+        <app-chart-card title="Evolución de la facturación" subtitle="Importe mensual sin pedidos cancelados" type="line"
+          [labels]="mensual().labels" [series]="[{ label: 'Facturación', data: mensual().data }]" valueFormat="currency" [loading]="loading()" />
+      </div>
+      <app-chart-card title="Ventas por categoría" subtitle="Pulsa un sector para filtrar" type="doughnut"
+        [labels]="porCategoria().labels" [series]="[{ label: 'Facturación', data: porCategoria().data, color: porCategoria().colors }]"
+        valueFormat="currency" [loading]="loading()" (segmentSelect)="onCategoria($event)" />
+      <app-chart-card title="Pedidos por estado" subtitle="Pulsa una barra para filtrar" type="bar"
+        [labels]="porEstado().labels" [series]="[{ label: 'Pedidos', data: porEstado().data }]" [loading]="loading()"
+        (segmentSelect)="onEstado($event)" />
+      <div class="span-2">
+        <app-chart-card title="Top 8 productos" subtitle="Por facturación en el periodo" type="bar" [horizontal]="true" [height]="320"
+          [labels]="topProductos().labels" [series]="[{ label: 'Facturación', data: topProductos().data }]" valueFormat="currency" [loading]="loading()" />
+      </div>
+    </div>
+
+    <div class="two-cols">
+      <section class="panel" aria-labelledby="criticos-title">
+        <div class="panel-head"><h2 id="criticos-title">Productos con stock crítico</h2></div>
+        <app-data-table caption="Productos con stock crítico" [columns]="criticosCols" [rows]="criticos()" [searchable]="false" [pageSize]="6"
+          [clickableRows]="true" (rowClick)="onProductoCritico($event)" [loading]="loading()" emptyText="Todo el inventario está por encima del mínimo" />
+      </section>
+      <section class="panel" aria-labelledby="actividad-title">
+        <div class="panel-head">
+          <h2 id="actividad-title">Actividad en tiempo real</h2>
+          <span class="live" [attr.data-status]="realtime.status()">
+            <ion-icon name="radio-outline" aria-hidden="true"></ion-icon>
+            {{ realtime.status() === 'live' ? 'En vivo' : realtime.status() === 'error' ? 'Sin conexión' : 'Conectando…' }}
+          </span>
+        </div>
+        <app-activity-feed [items]="actividad() ?? []" [loading]="actividad() === null" (itemSelect)="onActividad($event)" />
+        @if (realtime.online().length) {
+          <h3 class="online-title"><ion-icon name="people-outline" aria-hidden="true"></ion-icon> Conectados ahora</h3>
+          <ul class="online">
+            @for (u of realtime.online(); track u.user_id) {
+              <li><span class="dot" aria-hidden="true"></span>{{ u.nombre }} <span class="muted">({{ u.role === 'admin' ? 'admin' : 'usuario' }})</span></li>
+            }
+          </ul>
+        }
+      </section>
+    </div>
+  </div>
+</ion-content>
