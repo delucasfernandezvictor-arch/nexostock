@@ -1,0 +1,77 @@
+<app-page-header title="Nuevo pedido" backHref="/app/catalogo" />
+
+<ion-content>
+  <form class="page narrow" [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+    <section class="panel" aria-labelledby="lineas-title">
+      <div class="panel-head">
+        <h2 id="lineas-title">Productos ({{ lineas.length }})</h2>
+        <a routerLink="/app/catalogo">Ir al catálogo</a>
+      </div>
+
+      <div class="add-line">
+        <ion-select label="Añadir producto" labelPlacement="stacked" fill="outline" interface="popover"
+          [formControl]="nuevoProducto" placeholder="Selecciona un producto" [disabled]="productos.isLoading()">
+          @for (p of disponibles(); track p.id) {
+            <ion-select-option [value]="p.id">{{ p.nombre }} · {{ formatCurrency(p.precio) }} ({{ p.stock }} uds.)</ion-select-option>
+          }
+        </ion-select>
+        <ion-button type="button" (click)="anadirLinea()" [disabled]="!nuevoProducto.value">
+          <ion-icon slot="start" name="add-outline" aria-hidden="true"></ion-icon> Añadir
+        </ion-button>
+      </div>
+
+      @if (lineas.length === 0) {
+        <app-empty-state icon="cart-outline" title="Tu pedido está vacío" message="Añade productos desde el selector o desde el catálogo." />
+      } @else {
+        <ol class="lineas" formArrayName="lineas">
+          @for (linea of lineas.controls; track linea; let i = $index) {
+            <li class="linea" [formGroupName]="i">
+              @if (resumen().lineas[i]; as r) {
+                <div class="linea-info">
+                  <strong>{{ r.producto?.nombre ?? 'Producto no disponible' }}</strong>
+                  <span class="muted">{{ r.producto?.sku }} · {{ formatCurrency(r.producto?.precio ?? 0) }}/ud.</span>
+                </div>
+                <div class="linea-qty">
+                  <ion-button type="button" fill="outline" size="small" (click)="cambiarCantidad(i, -1)"
+                    [attr.aria-label]="'Quitar una unidad de ' + r.producto?.nombre">
+                    <ion-icon slot="icon-only" name="remove-outline" aria-hidden="true"></ion-icon>
+                  </ion-button>
+                  <ion-input class="qty" type="number" inputmode="numeric" min="1" [max]="r.producto?.stock ?? 1" fill="outline"
+                    [label]="'Cantidad de ' + (r.producto?.nombre ?? '')" labelPlacement="floating" formControlName="cantidad"
+                    [errorText]="cantidadError(i)"></ion-input>
+                  <ion-button type="button" fill="outline" size="small" (click)="cambiarCantidad(i, 1)"
+                    [attr.aria-label]="'Añadir una unidad de ' + r.producto?.nombre">
+                    <ion-icon slot="icon-only" name="add-outline" aria-hidden="true"></ion-icon>
+                  </ion-button>
+                </div>
+                <span class="subtotal">{{ formatCurrency(r.subtotal) }}</span>
+                <ion-button type="button" fill="clear" color="danger" (click)="quitarLinea(i)" [attr.aria-label]="'Eliminar ' + r.producto?.nombre + ' del pedido'">
+                  <ion-icon slot="icon-only" name="trash-outline" aria-hidden="true"></ion-icon>
+                </ion-button>
+              }
+            </li>
+          }
+        </ol>
+      }
+    </section>
+
+    <section class="panel" aria-labelledby="datos-title">
+      <h2 id="datos-title">Datos del pedido</h2>
+      <ion-select label="Prioridad" labelPlacement="stacked" fill="outline" interface="popover" formControlName="prioridad" class="field">
+        @for (p of prioridades; track p) { <ion-select-option [value]="p">{{ capitalize(p) }}</ion-select-option> }
+      </ion-select>
+      <ion-textarea label="Notas para el almacén (opcional)" labelPlacement="stacked" fill="outline" formControlName="notas"
+        [counter]="true" maxlength="500" [autoGrow]="true" class="field"
+        [errorText]="errorText(form.controls.notas.errors)"></ion-textarea>
+    </section>
+
+    <section class="panel total-panel" aria-label="Resumen del pedido">
+      <p><span>Unidades</span><strong>{{ resumen().unidades }}</strong></p>
+      <p class="grand" aria-live="polite"><span>Total</span><strong>{{ formatCurrency(resumen().total) }}</strong></p>
+      <ion-button type="submit" expand="block" [disabled]="enviando() || lineas.length === 0">
+        @if (enviando()) { <ion-spinner name="crescent" aria-hidden="true"></ion-spinner><span class="sr-only">Enviando pedido…</span> }
+        @else { <ion-icon slot="start" name="send-outline" aria-hidden="true"></ion-icon> Confirmar pedido }
+      </ion-button>
+    </section>
+  </form>
+</ion-content>
