@@ -1,12 +1,16 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/guards/auth.guards';
+import { authActivateGuard, authGuard, guestGuard } from './core/guards/auth.guards';
 
 /**
  * Rutas raíz. Todas las vistas se cargan de forma **diferida** (lazy loading):
  * cada `loadComponent` / `loadChildren` genera un *chunk* JavaScript propio que
  * solo se descarga cuando se navega a la ruta.
  *
- * Los guards son `canMatch`: si fallan, el chunk protegido ni se descarga.
+ * Defensa en profundidad en la zona privada `/app`:
+ *  1. `canMatch`: si no hay sesión, el chunk protegido ni se descarga (nivel red).
+ *  2. `canActivate` / `canActivateChild`: se vuelve a comprobar la sesión antes
+ *     de instanciar el shell y en cada navegación entre pantallas internas
+ *     (nivel vista), por ejemplo si el token ha caducado entretanto.
  */
 export const routes: Routes = [
   {
@@ -24,6 +28,8 @@ export const routes: Routes = [
   {
     path: 'app',
     canMatch: [authGuard],
+    canActivate: [authActivateGuard],
+    canActivateChild: [authActivateGuard],
     loadComponent: () => import('./layout/shell/shell.component').then((m) => m.ShellComponent),
     loadChildren: () => import('./features/features.routes').then((m) => m.FEATURE_ROUTES),
   },
