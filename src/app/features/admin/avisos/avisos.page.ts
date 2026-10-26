@@ -5,6 +5,7 @@ import { IonButton, IonContent, IonIcon, IonInput, IonSelect, IonSelectOption, I
 import { addIcons } from 'ionicons';
 import { megaphoneOutline, trashOutline, sendOutline } from 'ionicons/icons';
 import { catchError, of } from 'rxjs';
+import { HasPendingChanges } from '../../../core/guards/pending-changes.guard';
 import { Aviso, Documento, NivelAviso } from '../../../core/models';
 import { NotifyService } from '../../../core/services/notify.service';
 import { RealtimeDocsService } from '../../../core/services/realtime-docs.service';
@@ -23,6 +24,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, IonContent, IonInput, IonTextarea, IonSelect, IonSelectOption, IonButton, IonIcon, IonSpinner, PageHeaderComponent],
   styleUrls: ['../../auth/auth.scss'],
+  host: { '(window:beforeunload)': 'onBeforeUnload($event)' },
   template: `
     <app-page-header title="Avisos de empresa" />
     <ion-content>
@@ -80,7 +82,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
     summary { cursor: pointer; font-size: .875rem; color: var(--app-text-primary); }
   `,
 })
-export class AvisosPage {
+export class AvisosPage implements HasPendingChanges {
   private readonly realtime = inject(RealtimeDocsService);
   private readonly notify = inject(NotifyService);
   private readonly fb = inject(FormBuilder).nonNullable;
@@ -101,6 +103,16 @@ export class AvisosPage {
 
   constructor() {
     addIcons({ megaphoneOutline, trashOutline, sendOutline });
+  }
+
+  /** Hay un aviso a medio escribir (lo consulta `pendingChangesGuard`). */
+  hasPendingChanges(): boolean {
+    return this.form.dirty && !this.enviando();
+  }
+
+  /** Aviso nativo del navegador al recargar o cerrar la pestaña con cambios. */
+  protected onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasPendingChanges()) event.preventDefault();
   }
 
   protected json(v: unknown): string {

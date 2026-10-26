@@ -6,6 +6,7 @@ import { IonButton, IonCol, IonContent, IonGrid, IonIcon, IonInput, IonRow, IonS
 import { addIcons } from 'ionicons';
 import { checkmarkCircle, closeCircle, saveOutline, arrowBackOutline } from 'ionicons/icons';
 import { map, startWith } from 'rxjs';
+import { HasPendingChanges } from '../../../core/guards/pending-changes.guard';
 import { Categoria, ProductoInput } from '../../../core/models';
 import { NotifyService } from '../../../core/services/notify.service';
 import { ProductosService } from '../../../core/services/productos.service';
@@ -20,6 +21,9 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
  * Formulario reactivo con validación síncrona (formato, rangos, coherencia de
  * stock a nivel de grupo) y **validación asíncrona** del SKU contra la base de
  * datos, que excluye el propio producto cuando se está editando.
+ *
+ * Implementa {@link HasPendingChanges}: `pendingChangesGuard` pide confirmación
+ * antes de salir con cambios sin guardar.
  */
 @Component({
   selector: 'app-producto-form',
@@ -30,8 +34,9 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
     ReactiveFormsModule, IonContent, IonGrid, IonRow, IonCol, IonInput, IonTextarea, IonSelect, IonSelectOption, IonToggle, IonButton,
     IonIcon, IonSpinner, PageHeaderComponent, EmptyStateComponent,
   ],
+  host: { '(window:beforeunload)': 'onBeforeUnload($event)' },
 })
-export class ProductoFormPage implements OnInit {
+export class ProductoFormPage implements OnInit, HasPendingChanges {
   private readonly fb = inject(FormBuilder).nonNullable;
   private readonly productosSvc = inject(ProductosService);
   private readonly notify = inject(NotifyService);
@@ -104,6 +109,16 @@ export class ProductoFormPage implements OnInit {
     });
   }
 
+  /** Hay cambios sin guardar (lo consulta `pendingChangesGuard`). */
+  hasPendingChanges(): boolean {
+    return this.form.dirty && !this.guardando();
+  }
+
+  /** Aviso nativo del navegador al recargar o cerrar la pestaña con cambios. */
+  protected onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasPendingChanges()) event.preventDefault();
+  }
+
   protected skuError(): string {
     return errorText(this.form.controls.sku.errors, {
       pattern: 'Formato AAA-0000 (tres letras, guion y cuatro dígitos)',
@@ -132,6 +147,7 @@ export class ProductoFormPage implements OnInit {
     op.subscribe({
       next: (p) => {
         this.guardando.set(false);
+        this.form.markAsPristine(); // ya está guardado: salir no debe pedir confirmación
         void this.notify.success(id === null ? `Producto ${p.sku} creado` : `Producto ${p.sku} actualizado`);
         void this.router.navigateByUrl('/app/catalogo');
       },
