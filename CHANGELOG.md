@@ -17,5 +17,5 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 - Informes PDF (jsPDF y autotable) y CSV (RFC 4180).
 - Accesibilidad WCAG 2.2 AA: tema claro y oscuro, alto contraste, escala de texto, navegación por teclado y ARIA.
 - PWA: manifest, iconos y service worker.
-- 35 tests unitarios con Vitest, CI en GitHub Actions, despliegue en Vercel y Compodoc.
+- 43 tests unitarios con Vitest, CI en GitHub Actions, despliegue en Vercel y Compodoc.
 - Manual de usuario en Markdown e integrado en la app.

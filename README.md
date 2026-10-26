@@ -82,7 +82,11 @@ El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasf
 ## Seguridad y control de acceso
 
 - **Autenticación** con Supabase Auth (JWT). La sesión se restaura de forma asíncrona y el token se renueva solo. El `authInterceptor` obtiene el token vigente **en cada petición**, y el `errorInterceptor` cierra la sesión y redirige al login si recibe un 401.
-- **Guards** `canMatch` (`authGuard`, `roleGuard('admin')`, `guestGuard`). Una ruta protegida ni siquiera **descarga su código** si el usuario no tiene permiso.
+- **Guards funcionales con defensa en profundidad**. Toda la lógica de autorización está en una sola función compartida y devuelve siempre `true` o un `UrlTree`:
+  - `canMatch` (`authGuard`, `roleGuard('admin')`): una ruta protegida ni siquiera **descarga su código** si el usuario no tiene permiso.
+  - `canActivate` / `canActivateChild` (`authActivateGuard`, `roleActivateGuard('admin')`): se vuelve a comprobar antes de instanciar cada vista. La URL de retorno (`?redirect=`) conserva la ruta completa y sus parámetros.
+  - `canDeactivate` (`pendingChangesGuard`): pide confirmación antes de abandonar un formulario con cambios sin guardar (productos y avisos).
+  - `guestGuard`: impide volver al login con sesión iniciada.
 - **El control real está en el servidor**: **Row Level Security** en todas las tablas y funciones `SECURITY DEFINER` que validan el rol. Aunque se manipule el cliente, un usuario estándar no puede leer pedidos ajenos, crear productos ni cambiar roles. Se ha comprobado con peticiones directas a la API (código `42501`).
 - **Ningún secreto en el repositorio**: la URL y la clave *publishable* se inyectan en tiempo de build desde variables de entorno (`scripts/set-env.mjs`). `.env` y `runtime-env.ts` están en `.gitignore`. Las credenciales de prueba solo aparecen en el PDF de entrega.
 - **Prevención de *open redirect*** en el login, **neutralización de inyección de fórmulas** en los CSV y cabeceras de seguridad (`HSTS`, `X-Frame-Options`, `nosniff`...) en `vercel.json`.
@@ -126,7 +130,7 @@ El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasf
 |---|---|
 | `npm start` | Servidor de desarrollo |
 | `npm run build` | Build de producción en `www/`: PWA con service worker y *hashing* |
-| `npm test` / `npm run test:ci` | Tests unitarios con **Vitest**: 35 tests de guards, stores, validadores, utilidades, interceptores y DataTable |
+| `npm test` / `npm run test:ci` | Tests unitarios con **Vitest**: 43 tests de guards (incluida la integración con el router), stores, validadores, utilidades, interceptores y DataTable |
 | `npm run lint` | ESLint + angular-eslint |
 | `npm run docs` | Documentación técnica con **Compodoc** en `documentation/` |
 | `npm run vercel-build` | Pipeline de despliegue: tests → build → docs en `www/docs` |
@@ -166,7 +170,7 @@ El historial (`git log --graph --oneline --all`) muestra cada rama de caracterí
 src/app/
 ├── core/                 # Lógica no visual (sin dependencias de la vista)
 │   ├── config/           # Token de configuración inyectable
-│   ├── guards/           # authGuard, roleGuard, guestGuard
+│   ├── guards/           # canMatch, canActivate y canDeactivate (RBAC)
 │   ├── interceptors/     # auth (JWT), error, loading
 │   ├── models/           # Interfaces de dominio
 │   ├── services/         # SQL API, Realtime NoSQL, exportación, notificaciones...

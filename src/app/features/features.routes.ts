@@ -1,7 +1,17 @@
-import { Routes } from '@angular/router';
-import { roleGuard } from '../core/guards/auth.guards';
+import { Route, Routes } from '@angular/router';
+import { roleActivateGuard, roleGuard } from '../core/guards/auth.guards';
+import { pendingChangesGuard } from '../core/guards/pending-changes.guard';
 
-/** Rutas internas (requieren sesión). Las marcadas con `roleGuard('admin')` solo para administradores. */
+/**
+ * Protección de las rutas de administración con defensa en profundidad:
+ * `canMatch` impide descargar el código y `canActivate` impide instanciar la vista.
+ */
+const ADMIN_ONLY: Pick<Route, 'canMatch' | 'canActivate'> = {
+  canMatch: [roleGuard('admin')],
+  canActivate: [roleActivateGuard('admin')],
+};
+
+/** Rutas internas (requieren sesión). Las marcadas con `ADMIN_ONLY` solo para administradores. */
 export const FEATURE_ROUTES: Routes = [
   { path: '', redirectTo: 'inicio', pathMatch: 'full' },
   {
@@ -44,31 +54,34 @@ export const FEATURE_ROUTES: Routes = [
   {
     path: 'dashboard',
     title: 'Cuadro de mando',
-    canMatch: [roleGuard('admin')],
+    ...ADMIN_ONLY,
     loadComponent: () => import('./admin/dashboard/dashboard.page').then((m) => m.DashboardPage),
   },
   {
     path: 'productos/nuevo',
     title: 'Alta de producto',
-    canMatch: [roleGuard('admin')],
+    ...ADMIN_ONLY,
+    canDeactivate: [pendingChangesGuard],
     loadComponent: () => import('./admin/producto-form/producto-form.page').then((m) => m.ProductoFormPage),
   },
   {
     path: 'productos/:id',
     title: 'Editar producto',
-    canMatch: [roleGuard('admin')],
+    ...ADMIN_ONLY,
+    canDeactivate: [pendingChangesGuard],
     loadComponent: () => import('./admin/producto-form/producto-form.page').then((m) => m.ProductoFormPage),
   },
   {
     path: 'usuarios',
     title: 'Usuarios y roles',
-    canMatch: [roleGuard('admin')],
+    ...ADMIN_ONLY,
     loadComponent: () => import('./admin/usuarios/usuarios.page').then((m) => m.UsuariosPage),
   },
   {
     path: 'avisos',
     title: 'Avisos',
-    canMatch: [roleGuard('admin')],
+    ...ADMIN_ONLY,
+    canDeactivate: [pendingChangesGuard],
     loadComponent: () => import('./admin/avisos/avisos.page').then((m) => m.AvisosPage),
   },
 
