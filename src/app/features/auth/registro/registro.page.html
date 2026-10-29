@@ -1,5 +1,6 @@
 <ion-content>
-  <app-auth-layout title="Crea tu cuenta" subtitle="Alta como usuario estándar. Un administrador puede ampliar tus permisos.">
+  <app-auth-layout title="Crea tu cuenta" subtitle="Alta como usuario estándar. Un administrador puede ampliar tus permisos."
+    backLink="/login" backLabel="Volver al inicio de sesión">
     @if (confirmationSent()) {
       <div class="form-alert success" role="status">
         <ion-icon name="mail-open-outline" aria-hidden="true"></ion-icon>
@@ -53,9 +54,16 @@
           <ion-input-password-toggle slot="end" showLabel="Mostrar contraseña" hideLabel="Ocultar contraseña"></ion-input-password-toggle>
         </ion-input>
 
-        <ion-checkbox formControlName="acepta" labelPlacement="end" justify="start" class="field"
-          [errorText]="'Debes aceptar la política de uso de datos'">
-          Acepto la política de uso de datos de la empresa
+        <ion-checkbox formControlName="acepta" labelPlacement="end" justify="start" class="check"
+          aria-describedby="terms-help" [errorText]="'Debes aceptar la política de uso de datos'">
+          He leído y acepto la política de uso de datos de la empresa
+        </ion-checkbox>
+        <p id="terms-help" class="check-help">
+          <button type="button" class="link-btn" (click)="termsOpen.set(true)" aria-haspopup="dialog">Leer la política de uso de datos</button>
+        </p>
+
+        <ion-checkbox formControlName="recordar" labelPlacement="end" justify="start" class="check">
+          Recordar mi email en este dispositivo
         </ion-checkbox>
 
         @if (auth.error(); as error) {
@@ -73,4 +81,52 @@
     }
     <p class="auth-foot">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
   </app-auth-layout>
+
+  <ion-modal [isOpen]="termsOpen()" (didDismiss)="termsOpen.set(false)" aria-labelledby="terms-title">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title><h2 id="terms-title" class="modal-title">Política de uso de datos</h2></ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="termsOpen.set(false)" aria-label="Cerrar la política de uso de datos">
+              <ion-icon slot="icon-only" name="close-outline" aria-hidden="true"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding terms">
+        <p class="terms-intro">
+          <ion-icon name="shield-checkmark-outline" aria-hidden="true"></ion-icon>
+          Resumen de cómo trata NexoStock los datos de las cuentas de usuario, conforme al RGPD (UE 2016/679) y la LOPDGDD (Ley Orgánica 3/2018).
+        </p>
+        <h3>1. Responsable y finalidad</h3>
+        <p>Los datos se utilizan exclusivamente para gestionar tu acceso a la aplicación, tus pedidos internos de material y las estadísticas de inventario de la empresa.</p>
+        <h3>2. Datos que se tratan</h3>
+        <ul>
+          <li>Nombre, email corporativo y departamento.</li>
+          <li>Historial de pedidos y cambios de estado asociados a tu cuenta.</li>
+          <li>Nunca se almacena tu contraseña en claro: la gestiona el servicio de autenticación de forma cifrada.</li>
+        </ul>
+        <h3>3. Quién puede verlos</h3>
+        <p>Tú ves tus propios pedidos. Los administradores ven los de toda la empresa para aprobarlos y enviarlos. El control de acceso se aplica en el servidor.</p>
+        <h3>4. Conservación</h3>
+        <p>Los datos se conservan mientras tu cuenta esté activa y durante el tiempo exigido por las obligaciones legales aplicables.</p>
+        <h3>5. Tus derechos</h3>
+        <p>Puedes ejercer los derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad contactando con el departamento de Sistemas.</p>
+        <h3>6. Recordar tu email</h3>
+        <p>Si marcas «Recordar mi email», solo se guarda tu dirección de email en este dispositivo para rellenar el acceso; puedes desmarcarlo en cualquier momento.</p>
+        <p class="terms-note">Aplicación académica de demostración con datos sintéticos.</p>
+      </ion-content>
+      <ion-footer>
+        <ion-toolbar>
+          <div class="terms-actions">
+            <ion-button fill="outline" (click)="termsOpen.set(false)">Cerrar</ion-button>
+            <ion-button (click)="acceptTerms()">
+              <ion-icon slot="start" name="checkmark-circle" aria-hidden="true"></ion-icon> He leído y acepto
+            </ion-button>
+          </div>
+        </ion-toolbar>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
 </ion-content>

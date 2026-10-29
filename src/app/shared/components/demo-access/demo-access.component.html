@@ -1,0 +1,89 @@
+@if (accounts().length) {
+  <section class="demo" [attr.aria-labelledby]="uid + '-title'">
+    <div class="demo-divider">
+      <span [id]="uid + '-title'"><ion-icon name="flash" aria-hidden="true"></ion-icon> Acceso rápido de demostración</span>
+    </div>
+
+    <div class="demo-grid">
+      @if (admin(); as a) {
+        <button
+          type="button"
+          class="tile tile-admin"
+          [class.selected]="adminSelected()"
+          [disabled]="disabled()"
+          [attr.aria-pressed]="adminSelected()"
+          (click)="choose(a)">
+          <span class="tile-icon" aria-hidden="true"><ion-icon name="shield-checkmark"></ion-icon></span>
+          <span class="tile-text">
+            <span class="tile-overline">Modo</span>
+            <span class="tile-title">Administrador</span>
+            <span class="tile-sub">{{ a.nombre }} · {{ a.departamento }}</span>
+          </span>
+          @if (adminSelected()) { <ion-icon class="tile-check" name="checkmark-circle" aria-hidden="true"></ion-icon> }
+        </button>
+      }
+
+      <div class="tile-wrap">
+        <button
+          #trigger
+          type="button"
+          class="tile tile-user"
+          [class.selected]="selectedUser() !== null"
+          [class.open]="open()"
+          [disabled]="disabled()"
+          aria-haspopup="listbox"
+          [attr.aria-expanded]="open()"
+          [attr.aria-controls]="open() ? uid + '-list' : null"
+          (click)="toggle()"
+          (keydown)="onTriggerKey($event)">
+          @if (selectedUser(); as s) {
+            <span class="avatar sm" [style.background]="s.color" aria-hidden="true">{{ initials(s.nombre) }}</span>
+          } @else {
+            <span class="tile-icon" aria-hidden="true"><ion-icon name="people-outline"></ion-icon></span>
+          }
+          <span class="tile-text">
+            <span class="tile-overline">Modo</span>
+            <span class="tile-title">Usuario</span>
+            <span class="tile-sub">{{ selectedUser() ? selectedUser()!.nombre + ' · ' + selectedUser()!.departamento : 'Elige una cuenta' }}</span>
+          </span>
+          <ion-icon class="chevron" name="chevron-down" aria-hidden="true"></ion-icon>
+        </button>
+
+        @if (open()) {
+          <ul
+            #list
+            class="menu"
+            role="listbox"
+            tabindex="-1"
+            [id]="uid + '-list'"
+            aria-label="Cuentas de usuario estándar"
+            [attr.aria-activedescendant]="optionId(active())"
+            (keydown)="onListKey($event)">
+            @for (u of users(); track u.email; let i = $index) {
+              <li
+                role="option"
+                class="option"
+                [id]="optionId(i)"
+                [class.active]="i === active()"
+                [attr.aria-selected]="u.email === selectedEmail()"
+                (mouseenter)="active.set(i)"
+                (click)="choose(u)">
+                <span class="avatar" [style.background]="u.color" aria-hidden="true">{{ initials(u.nombre) }}</span>
+                <span class="opt-text">
+                  <span class="opt-name">{{ u.nombre }}</span>
+                  <span class="opt-email">{{ u.email }}</span>
+                </span>
+                <span class="chip">{{ u.departamento }}</span>
+                @if (u.email === selectedEmail()) {
+                  <ion-icon class="opt-check" name="checkmark-circle" aria-hidden="true"></ion-icon>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+
+    <p class="demo-note">Cuentas con datos sintéticos. Se rellenan el email y la contraseña; después pulsa <strong>Entrar</strong>.</p>
+  </section>
+}

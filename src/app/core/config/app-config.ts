@@ -7,6 +7,10 @@ export interface AppConfig {
   supabaseAnonKey: string;
   production: boolean;
   pageSize: number;
+  /** Contraseña de la cuenta demo de administrador (inyectada en el build; nunca en el repositorio) */
+  demoAdminPassword: string;
+  /** Contraseña compartida de las cuentas demo de usuario estándar */
+  demoUserPassword: string;
 }
 
 /** Token de inyección de la configuración. */
