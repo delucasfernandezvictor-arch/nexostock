@@ -85,6 +85,18 @@
   ion-icon.inactive { opacity: 0.45; }
 }
 
+// Miniatura de imagen (columnas de tipo «image»)
+.thumb {
+  display: block;
+  width: 3.5rem;
+  height: 2.625rem;
+  border-radius: 0.4rem;
+  object-fit: cover;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+}
+.thumb-empty { background: repeating-linear-gradient(135deg, var(--app-surface-2) 0 6px, var(--app-hover) 6px 12px); }
+
 .dt-pager {
   display: flex;
   justify-content: center;

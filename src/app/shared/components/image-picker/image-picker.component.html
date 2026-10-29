@@ -1,0 +1,43 @@
+<div class="picker" role="group" [attr.aria-labelledby]="uid + '-label'" [attr.aria-describedby]="uid + '-help'">
+  <span class="picker-label" [id]="uid + '-label'">{{ label() }}</span>
+
+  <div
+    class="drop"
+    [class.dragging]="dragging()"
+    [class.has-image]="!!previewUrl()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="dragging.set(false)"
+    (drop)="onDrop($event)">
+    @if (previewUrl(); as url) {
+      <img class="preview" [src]="url" [alt]="alt()" />
+    } @else {
+      <div class="empty" aria-hidden="true">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        <span>Arrastra una imagen aquí</span>
+      </div>
+    }
+    @if (busy()) {
+      <div class="busy" role="status"><ion-spinner name="crescent" aria-hidden="true"></ion-spinner><span>Optimizando imagen…</span></div>
+    }
+  </div>
+
+  <div class="actions">
+    <ion-button type="button" fill="outline" size="small" [disabled]="disabled() || busy()" (click)="browse()">
+      <ion-icon slot="start" [name]="previewUrl() ? 'swap-horizontal-outline' : 'image-outline'" aria-hidden="true"></ion-icon>
+      {{ previewUrl() ? 'Cambiar imagen' : 'Elegir imagen' }}
+    </ion-button>
+    @if (previewUrl()) {
+      <ion-button type="button" fill="clear" color="danger" size="small" [disabled]="disabled() || busy()" (click)="remove.emit()">
+        <ion-icon slot="start" name="trash-outline" aria-hidden="true"></ion-icon> Quitar imagen
+      </ion-button>
+    }
+  </div>
+
+  <p class="help" [id]="uid + '-help'">PNG, JPG, WebP o GIF de hasta 10 MB. Se optimiza automáticamente a 800 px en formato WebP antes de subirla.</p>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  <input #fileInput class="sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif"
+    tabindex="-1" aria-hidden="true" (change)="onFileChange($event)" />
+</div>

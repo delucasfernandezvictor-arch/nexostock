@@ -45,6 +45,13 @@
       <ul class="cards" aria-label="Productos">
         @for (p of tarjetas(); track p.id) {
           <li class="card">
+            <div class="card-media" [style.--cat]="p.categoria?.color">
+              @if (imgUrl(p); as url) {
+                <img [src]="url" alt="" loading="lazy" decoding="async" width="400" height="300" />
+              } @else {
+                <ion-icon name="cube-outline" aria-hidden="true"></ion-icon>
+              }
+            </div>
             <div class="card-top">
               <span class="cat" [style.--cat]="p.categoria?.color">{{ p.categoria?.nombre }}</span>
               <app-status-badge [value]="nivelStock(p)" />

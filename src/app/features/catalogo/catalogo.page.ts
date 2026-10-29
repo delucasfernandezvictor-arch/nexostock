@@ -14,6 +14,7 @@ import {
 import { debounceTime, forkJoin, retry, timer } from 'rxjs';
 import { Producto, TableAction, TableActionEvent, TableColumn, nivelStock } from '../../core/models';
 import { NotifyService } from '../../core/services/notify.service';
+import { ProductImagesService } from '../../core/services/product-images.service';
 import { ProductosService } from '../../core/services/productos.service';
 import { RealtimeDocsService } from '../../core/services/realtime-docs.service';
 import { AuthStore } from '../../core/state/auth.store';
@@ -27,7 +28,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 
 /** Fila de la vista de tabla (producto con campos derivados). */
-type ProductoFila = Producto & { categoria_nombre: string; nivel: string };
+type ProductoFila = Producto & { categoria_nombre: string; nivel: string; imagen: string };
 
 /**
  * **Catálogo de productos**.
@@ -52,6 +53,12 @@ export class CatalogoPage {
   protected readonly cart = inject(CartStore);
   private readonly productosSvc = inject(ProductosService);
   private readonly notify = inject(NotifyService);
+  private readonly images = inject(ProductImagesService);
+
+  /** URL pública de la imagen del producto en Supabase Storage */
+  protected imgUrl(p: Producto): string | null {
+    return this.images.url(p.imagen_path);
+  }
   private readonly alertCtrl = inject(AlertController);
   private readonly router = inject(Router);
 
@@ -83,10 +90,16 @@ export class CatalogoPage {
   });
 
   protected readonly filas = computed<ProductoFila[]>(() =>
-    this.filtrados().map((p) => ({ ...p, categoria_nombre: p.categoria?.nombre ?? '', nivel: p.activo ? nivelStock(p) : 'inactivo' })),
+    this.filtrados().map((p) => ({
+      ...p,
+      categoria_nombre: p.categoria?.nombre ?? '',
+      nivel: p.activo ? nivelStock(p) : 'inactivo',
+      imagen: this.images.url(p.imagen_path) ?? '',
+    })),
   );
 
   protected readonly columns: TableColumn<ProductoFila>[] = [
+    { key: 'imagen', label: 'Imagen', type: 'image', sortable: false, searchable: false, hideOnMobile: true },
     { key: 'sku', label: 'SKU' },
     { key: 'nombre', label: 'Producto' },
     { key: 'categoria_nombre', label: 'Categoría', hideOnMobile: true },
@@ -177,6 +190,8 @@ export class CatalogoPage {
             this.productosSvc.delete(p.id).subscribe({
               next: () => {
                 void this.notify.success('Producto eliminado');
+                // La imagen deja de estar referenciada: se borra también de Storage
+                void this.images.remove(p.imagen_path).catch(() => undefined);
                 this.cart.remove(p.id);
                 this.data.reload();
               },

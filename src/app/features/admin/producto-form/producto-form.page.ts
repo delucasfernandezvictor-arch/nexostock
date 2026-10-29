@@ -1,18 +1,20 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input, signal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IonButton, IonCol, IonContent, IonGrid, IonIcon, IonInput, IonRow, IonSelect, IonSelectOption, IonSpinner, IonTextarea, IonToggle } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { checkmarkCircle, closeCircle, saveOutline, arrowBackOutline } from 'ionicons/icons';
-import { map, startWith } from 'rxjs';
+import { firstValueFrom, map, startWith } from 'rxjs';
 import { HasPendingChanges } from '../../../core/guards/pending-changes.guard';
-import { Categoria, ProductoInput } from '../../../core/models';
+import { Categoria, ProductoInput, errorMessage } from '../../../core/models';
 import { NotifyService } from '../../../core/services/notify.service';
+import { PreparedImage, ProductImagesService } from '../../../core/services/product-images.service';
 import { ProductosService } from '../../../core/services/productos.service';
 import { valueOr } from '../../../core/utils/resource';
 import { SKU_PATTERN, errorText, remoteUniqueValidator, stockCoherente } from '../../../core/validators/validators';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { ImagePickerComponent } from '../../../shared/components/image-picker/image-picker.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 
 /**
@@ -22,8 +24,11 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
  * stock a nivel de grupo) y **validación asíncrona** del SKU contra la base de
  * datos, que excluye el propio producto cuando se está editando.
  *
+ * La **imagen del producto** se guarda en Supabase Storage: se optimiza en el
+ * navegador, se sube al guardar y se borra la anterior para no dejar huérfanos.
+ *
  * Implementa {@link HasPendingChanges}: `pendingChangesGuard` pide confirmación
- * antes de salir con cambios sin guardar.
+ * antes de salir con cambios sin guardar (también si solo cambia la imagen).
  */
 @Component({
   selector: 'app-producto-form',
@@ -32,7 +37,7 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule, IonContent, IonGrid, IonRow, IonCol, IonInput, IonTextarea, IonSelect, IonSelectOption, IonToggle, IonButton,
-    IonIcon, IonSpinner, PageHeaderComponent, EmptyStateComponent,
+    IonIcon, IonSpinner, PageHeaderComponent, EmptyStateComponent, ImagePickerComponent,
   ],
   host: { '(window:beforeunload)': 'onBeforeUnload($event)' },
 })
@@ -41,6 +46,7 @@ export class ProductoFormPage implements OnInit, HasPendingChanges {
   private readonly productosSvc = inject(ProductosService);
   private readonly notify = inject(NotifyService);
   private readonly router = inject(Router);
+  private readonly images = inject(ProductImagesService);
 
   /** Parámetro de ruta `:id` (ausente en el alta) */
   readonly id = input<string>();
@@ -51,6 +57,22 @@ export class ProductoFormPage implements OnInit, HasPendingChanges {
   protected readonly cargando = signal(false);
   protected readonly noEncontrado = signal(false);
   protected readonly errorText = errorText;
+
+  // --- Imagen (Supabase Storage)
+  /** Ruta actual de la imagen en el bucket (la guardada en la base de datos) */
+  private readonly imagenActual = signal<string | null>(null);
+  /** Imagen nueva optimizada, pendiente de subir al guardar */
+  private readonly imagenNueva = signal<PreparedImage | null>(null);
+  /** El usuario ha pedido quitar la imagen actual */
+  private readonly quitarImagen = signal(false);
+  private readonly previewObjectUrl = signal<string | null>(null);
+  protected readonly procesandoImagen = signal(false);
+  protected readonly imagenError = signal<string | null>(null);
+  /** Lo que muestra el selector: la nueva, la actual o ninguna */
+  protected readonly vistaPrevia = computed(() =>
+    this.previewObjectUrl() ?? (this.quitarImagen() ? null : this.images.url(this.imagenActual())),
+  );
+  protected readonly imagenCambiada = computed(() => this.imagenNueva() !== null || this.quitarImagen());
 
   protected readonly categoriasRes = rxResource({ stream: () => this.productosSvc.categorias() });
   protected readonly categorias = valueOr(this.categoriasRes, [] as Categoria[]);
@@ -82,6 +104,8 @@ export class ProductoFormPage implements OnInit, HasPendingChanges {
 
   constructor() {
     addIcons({ checkmarkCircle, closeCircle, saveOutline, arrowBackOutline });
+    // Libera la URL temporal de la vista previa al salir (evita fugas de memoria)
+    inject(DestroyRef).onDestroy(() => this.setPreview(null));
   }
 
   ngOnInit(): void {
@@ -100,6 +124,7 @@ export class ProductoFormPage implements OnInit, HasPendingChanges {
           stock_minimo: p.stock_minimo,
           activo: p.activo,
         });
+        this.imagenActual.set(p.imagen_path ?? null);
         this.cargando.set(false);
       },
       error: () => {
@@ -111,7 +136,7 @@ export class ProductoFormPage implements OnInit, HasPendingChanges {
 
   /** Hay cambios sin guardar (lo consulta `pendingChangesGuard`). */
   hasPendingChanges(): boolean {
-    return this.form.dirty && !this.guardando();
+    return (this.form.dirty || this.imagenCambiada()) && !this.guardando();
   }
 
   /** Aviso nativo del navegador al recargar o cerrar la pestaña con cambios. */
@@ -126,7 +151,31 @@ export class ProductoFormPage implements OnInit, HasPendingChanges {
     });
   }
 
-  protected guardar(): void {
+  /** El usuario elige o suelta una imagen: se optimiza y se muestra la vista previa. */
+  protected async onImagen(file: File): Promise<void> {
+    this.imagenError.set(null);
+    this.procesandoImagen.set(true);
+    try {
+      const prepared = await this.images.prepare(file);
+      this.imagenNueva.set(prepared);
+      this.quitarImagen.set(false);
+      this.setPreview(URL.createObjectURL(prepared.blob));
+      this.notify.announce(`Imagen preparada: ${prepared.width} × ${prepared.height} píxeles, ${Math.round(prepared.blob.size / 1024)} KB`);
+    } catch (e) {
+      this.imagenError.set(errorMessage(e));
+    } finally {
+      this.procesandoImagen.set(false);
+    }
+  }
+
+  protected onQuitarImagen(): void {
+    this.imagenNueva.set(null);
+    this.setPreview(null);
+    this.quitarImagen.set(this.imagenActual() !== null);
+    this.notify.announce('Imagen retirada. Se aplicará al guardar');
+  }
+
+  protected async guardar(): Promise<void> {
     if (this.form.invalid || this.form.pending) {
       this.form.markAllAsTouched();
       void this.notify.error('Revisa los campos marcados');
@@ -143,19 +192,43 @@ export class ProductoFormPage implements OnInit, HasPendingChanges {
     };
     const id = this.productoId();
     this.guardando.set(true);
-    const op = id === null ? this.productosSvc.create(input) : this.productosSvc.update(id, input);
-    op.subscribe({
-      next: (p) => {
-        this.guardando.set(false);
-        this.form.markAsPristine(); // ya está guardado: salir no debe pedir confirmación
-        void this.notify.success(id === null ? `Producto ${p.sku} creado` : `Producto ${p.sku} actualizado`);
-        void this.router.navigateByUrl('/app/catalogo');
-      },
-      error: (err) => {
-        this.guardando.set(false);
-        void this.notify.error(err);
-      },
-    });
+    try {
+      // 1. Datos del producto (API REST SQL)
+      const p = await firstValueFrom(id === null ? this.productosSvc.create(input) : this.productosSvc.update(id, input));
+      // 2. Imagen (Supabase Storage): subir la nueva o quitar la actual, y borrar la anterior
+      await this.guardarImagen(p.id, p.sku);
+      this.form.markAsPristine(); // ya está guardado: salir no debe pedir confirmación
+      this.imagenNueva.set(null);
+      this.quitarImagen.set(false);
+      void this.notify.success(id === null ? `Producto ${p.sku} creado` : `Producto ${p.sku} actualizado`);
+      await this.router.navigateByUrl('/app/catalogo');
+    } catch (err) {
+      void this.notify.error(err);
+    } finally {
+      this.guardando.set(false);
+    }
+  }
+
+  /** Aplica en Storage el cambio de imagen pendiente. */
+  private async guardarImagen(productoId: number, sku: string): Promise<void> {
+    const anterior = this.imagenActual();
+    const nueva = this.imagenNueva();
+    if (nueva) {
+      const path = await this.images.upload(sku, nueva);
+      await firstValueFrom(this.productosSvc.setImagen(productoId, path));
+      this.imagenActual.set(path);
+      if (anterior) await this.images.remove(anterior).catch(() => undefined); // limpieza sin bloquear
+    } else if (this.quitarImagen() && anterior) {
+      await firstValueFrom(this.productosSvc.setImagen(productoId, null));
+      this.imagenActual.set(null);
+      await this.images.remove(anterior).catch(() => undefined);
+    }
+  }
+
+  private setPreview(url: string | null): void {
+    const prev = this.previewObjectUrl();
+    if (prev) URL.revokeObjectURL(prev);
+    this.previewObjectUrl.set(url);
   }
 
   protected cancelar(): void {
