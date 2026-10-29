@@ -1,5 +1,5 @@
 /** Tipo de dato de una columna: determina el formateo y la ordenación. */
-export type ColumnType = 'text' | 'number' | 'currency' | 'date' | 'datetime' | 'badge';
+export type ColumnType = 'text' | 'number' | 'currency' | 'date' | 'datetime' | 'badge' | 'image';
 
 /**
  * Definición de una columna para `app-data-table`.

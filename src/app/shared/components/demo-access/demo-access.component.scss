@@ -72,14 +72,17 @@
   font-size: 1.25rem;
 }
 
-.tile-text { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+// Contenido centrado: icono + texto forman un grupo en el centro de la tarjeta
+.tile { justify-content: center; padding-inline: 2.75rem; }
+.tile-text { display: flex; flex-direction: column; align-items: center; min-width: 0; flex: 0 1 auto; text-align: center; }
+.tile-check, .chevron { position: absolute; right: 0.9rem; top: 50%; translate: 0 -50%; }
 .tile-overline { font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--app-text-primary); }
 .tile-title { font-weight: 800; font-size: 1rem; line-height: 1.25; }
 .tile-sub { font-size: 0.8125rem; color: var(--app-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tile-check { color: var(--app-text-success); font-size: 1.2rem; flex: none; }
 
-.chevron { flex: none; color: var(--app-muted); transition: transform 0.2s ease; }
-.open .chevron { transform: rotate(180deg); }
+.chevron { flex: none; color: var(--app-muted); transition: rotate 0.2s ease; }
+.open .chevron { rotate: 180deg; }
 
 // --- Avatar con iniciales
 .avatar {

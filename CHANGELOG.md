@@ -2,6 +2,19 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [1.3.0] - 2026-10-29
+
+### Añadido
+- Imágenes de producto en **Supabase Storage**: bucket público `productos` con políticas RLS (solo el administrador escribe), límite de 2 MB y solo imágenes (`supabase/storage.sql`).
+- Componente reutilizable `app-image-picker`: arrastrar y soltar, vista previa, cambiar y quitar.
+- Optimización en el navegador: redimensionado a 800 px y conversión a WebP antes de subir.
+- Catálogo con imagen en cada tarjeta y miniaturas en la tabla (columna de tipo `image` en `app-data-table`).
+- Al eliminar un producto o cambiar su imagen se borra la anterior del bucket.
+- Cuadro de mando: gráfico de área polar por estado y treemap del top 10 de productos.
+
+### Cambiado
+- Panel de acceso rápido sin icono y con el contenido centrado.
+
 ## [1.2.0] - 2026-10-29
 
 ### Añadido

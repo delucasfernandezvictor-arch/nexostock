@@ -39,6 +39,11 @@ export class ProductosService {
     return this.update(id, { activo });
   }
 
+  /** Asocia (o quita, con `null`) la imagen del producto guardada en Storage. */
+  setImagen(id: number, imagenPath: string | null): Observable<Producto> {
+    return this.update(id, { imagen_path: imagenPath });
+  }
+
   /** Elimina definitivamente un producto (falla si tiene pedidos asociados: 23503). */
   delete(id: number): Observable<void> {
     return this.api.remove('productos', { id: `eq.${id}` }).pipe(map(() => undefined));

@@ -31,6 +31,12 @@
               <ion-textarea class="field" fill="outline" label="Descripción" labelPlacement="stacked" formControlName="descripcion"
                 [counter]="true" maxlength="500" [autoGrow]="true" [errorText]="errorText(form.controls.descripcion.errors)"></ion-textarea>
             </ion-col>
+            <ion-col size="12">
+              <app-image-picker label="Imagen del producto (Supabase Storage)" [previewUrl]="vistaPrevia()"
+                [alt]="'Imagen de ' + (form.controls.nombre.value || 'el producto')" [busy]="procesandoImagen()"
+                [disabled]="guardando() || cargando()" [error]="imagenError()"
+                (fileSelect)="onImagen($event)" (remove)="onQuitarImagen()" />
+            </ion-col>
             <ion-col size="12" sizeMd="6">
               <ion-select class="field" fill="outline" label="Categoría *" labelPlacement="stacked" interface="popover" formControlName="categoria_id"
                 placeholder="Selecciona una categoría" [errorText]="errorText(form.controls.categoria_id.errors)">

@@ -74,12 +74,14 @@
       <app-chart-card title="Ventas por categoría" subtitle="Pulsa un sector para filtrar" type="doughnut"
         [labels]="porCategoria().labels" [series]="[{ label: 'Facturación', data: porCategoria().data, color: porCategoria().colors }]"
         valueFormat="currency" [loading]="loading()" (segmentSelect)="onCategoria($event)" />
-      <app-chart-card title="Pedidos por estado" subtitle="Pulsa una barra para filtrar" type="bar"
-        [labels]="porEstado().labels" [series]="[{ label: 'Pedidos', data: porEstado().data }]" [loading]="loading()"
+      <app-chart-card title="Pedidos por estado" subtitle="Pulsa un sector para filtrar" type="polarArea"
+        [labels]="porEstado().labels" [series]="[{ label: 'Pedidos', data: porEstado().data, color: porEstado().colors }]" [loading]="loading()"
         (segmentSelect)="onEstado($event)" />
       <div class="span-2">
-        <app-chart-card title="Top 8 productos" subtitle="Por facturación en el periodo" type="bar" [horizontal]="true" [height]="320"
-          [labels]="topProductos().labels" [series]="[{ label: 'Facturación', data: topProductos().data }]" valueFormat="currency" [loading]="loading()" />
+        <app-chart-card title="Top 10 productos" subtitle="El área es la facturación y el color, la categoría. Pulsa uno para editarlo" type="treemap"
+          [height]="340" [labels]="topProductos().labels"
+          [series]="[{ label: 'Facturación', data: topProductos().data, color: topProductos().colors }]"
+          valueFormat="currency" [loading]="loading()" (segmentSelect)="onTopProducto($event)" />
       </div>
     </div>
 

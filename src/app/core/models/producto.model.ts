@@ -17,6 +17,8 @@ export interface Producto {
   stock: number;
   stock_minimo: number;
   activo: boolean;
+  /** Ruta de la imagen en el bucket `productos` de Supabase Storage (null = sin imagen) */
+  imagen_path: string | null;
   created_at: string;
   updated_at: string;
   /** Relación embebida por PostgREST (`select=*,categoria:categorias(*)`) */
@@ -27,7 +29,7 @@ export interface Producto {
 export type ProductoInput = Pick<
   Producto,
   'sku' | 'nombre' | 'descripcion' | 'categoria_id' | 'precio' | 'stock' | 'stock_minimo' | 'activo'
->;
+> & { imagen_path?: string | null };
 
 /** Estado de stock derivado de `stock` y `stock_minimo`. */
 export type NivelStock = 'agotado' | 'bajo' | 'ok';

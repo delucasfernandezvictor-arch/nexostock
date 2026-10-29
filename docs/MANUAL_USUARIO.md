@@ -151,7 +151,8 @@ Pendiente ──▶ Aprobado ──▶ Enviado ──▶ Entregado
 2. Rellena los campos. Los obligatorios llevan un asterisco (*).
    - **SKU**: formato `AAA-0000`, por ejemplo `INF-0007`. La app comprueba **al momento** que no esté en uso.
    - **Stock mínimo**: cuando el stock baje de ese valor se generará una alerta.
-3. Pulsa **Crear producto** o **Guardar cambios**.
+3. **Imagen del producto**: arrastra una imagen a la zona punteada o pulsa **Elegir imagen**. Se admiten PNG, JPG, WebP o GIF de hasta 10 MB. La aplicación la reduce a 800 px y la convierte a WebP antes de subirla, y verás una vista previa. Usa **Cambiar imagen** o **Quitar imagen** si lo necesitas.
+4. Pulsa **Crear producto** o **Guardar cambios**. La imagen se sube a Supabase Storage en ese momento.
 
 Para retirar un producto **sin perder el histórico**, **desactívalo**. Solo se puede **eliminar** un producto que no tenga pedidos.
 
