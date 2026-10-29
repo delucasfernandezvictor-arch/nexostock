@@ -4,8 +4,9 @@ import {
 } from '@angular/core';
 import {
   ArcElement, BarController, BarElement, CategoryScale, Chart, ChartConfiguration, ChartType, DoughnutController, Filler, Legend,
-  LineController, LineElement, LinearScale, PieController, PointElement, Tooltip,
+  LineController, LineElement, LinearScale, PieController, PointElement, PolarAreaController, RadialLinearScale, Tooltip,
 } from 'chart.js';
+import { TreemapController, TreemapElement } from 'chartjs-chart-treemap';
 import { IonSkeletonText } from '@ionic/angular';
 import { UiStore } from '../../../core/state/ui.store';
 import { formatCurrency, formatNumber } from '../../../core/utils/format';
@@ -13,8 +14,29 @@ import { formatCurrency, formatNumber } from '../../../core/utils/format';
 // Registro selectivo: solo los controladores usados (tree-shaking)
 Chart.register(
   BarController, BarElement, LineController, LineElement, PointElement, DoughnutController, PieController, ArcElement,
-  CategoryScale, LinearScale, Tooltip, Legend, Filler,
+  PolarAreaController, RadialLinearScale, TreemapController, TreemapElement, CategoryScale, LinearScale, Tooltip, Legend, Filler,
 );
+
+/** Nodo del treemap (lo que recibe el plugin en `tree`). */
+interface TreemapNode {
+  label: string;
+  value: number;
+  color: string;
+  index: number;
+}
+
+/** Texto blanco o casi negro según la luminosidad del fondo (contraste legible). */
+function readableOn(hex: string): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
+  if (!m) return '#ffffff';
+  const n = parseInt(m[1]!, 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+  });
+  const lum = 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+  return lum > 0.35 ? '#111827' : '#ffffff';
+}
 
 /** Serie de datos de un gráfico. */
 export interface ChartSeries {
@@ -33,7 +55,7 @@ export interface ChartSelection {
 }
 
 /** Tipos de gráfico soportados. */
-export type ChartKind = 'bar' | 'line' | 'doughnut' | 'pie';
+export type ChartKind = 'bar' | 'line' | 'doughnut' | 'pie' | 'polarArea' | 'treemap';
 
 let nextId = 0;
 
@@ -146,23 +168,29 @@ export class ChartCardComponent implements OnDestroy {
 
   private buildConfig(): ChartConfiguration {
     const type = this.type();
-    const circular = type === 'doughnut' || type === 'pie';
+    const polar = type === 'polarArea';
+    const circular = type === 'doughnut' || type === 'pie' || polar;
     const css = getComputedStyle(document.documentElement);
     const text = css.getPropertyValue('--ion-text-color').trim() || '#1e2230';
     const grid = css.getPropertyValue('--app-border').trim() || '#d9dce6';
+    const surface = css.getPropertyValue('--app-surface').trim() || '#fff';
     const palette = ['--app-chart-1', '--app-chart-2', '--app-chart-3', '--app-chart-4', '--app-chart-5', '--app-chart-6']
       .map((v) => css.getPropertyValue(v).trim())
       .filter(Boolean);
     const fallback = palette.length ? palette : ['#2f3fb8', '#0b7a75', '#b45309', '#be185d', '#7c3aed', '#15803d'];
     const fmt = (v: number) => this.fmt(v);
 
+    if (type === 'treemap') return this.treemapConfig(fallback, surface, fmt);
+
     const datasets = this.series().map((s, i) => {
       const color = s.color ?? (circular ? this.labels().map((_, j) => fallback[j % fallback.length]!) : fallback[i % fallback.length]!);
       return {
         label: s.label,
         data: [...s.data],
-        backgroundColor: type === 'line' ? `${String(color)}22` : color,
-        borderColor: circular ? css.getPropertyValue('--app-surface').trim() || '#fff' : color,
+        // El área polar usa colores semitransparentes para que se lean los anillos de la escala
+        backgroundColor: type === 'line' ? `${String(color)}22` : polar && Array.isArray(color) ? color.map((c) => `${c}cc`) : color,
+        hoverBackgroundColor: polar ? color : undefined,
+        borderColor: circular ? surface : color,
         borderWidth: circular ? 2 : type === 'line' ? 2.5 : 0,
         borderRadius: type === 'bar' ? 6 : 0,
         fill: type === 'line' && this.series().length === 1,
@@ -200,7 +228,16 @@ export class ChartCardComponent implements OnDestroy {
             },
           },
         },
-        scales: circular
+        scales: polar
+          ? {
+              r: {
+                beginAtZero: true,
+                grid: { color: grid },
+                angleLines: { color: grid },
+                ticks: { color: text, backdropColor: 'transparent', maxTicksLimit: 5, font: { size: 10 } },
+              },
+            }
+          : circular
           ? {}
           : {
               // El eje de categorías conserva el formateador por defecto (etiquetas);
@@ -217,6 +254,76 @@ export class ChartCardComponent implements OnDestroy {
                 grid: { color: this.horizontal() ? 'transparent' : grid },
               },
             },
+      } as ChartConfiguration['options'],
+    };
+  }
+
+  /**
+   * Configuración de **treemap**: cada rectángulo es un elemento y su área es
+   * proporcional al valor. Se usa para rankings (p. ej. top de productos):
+   * comunica a la vez el orden y el peso relativo de cada elemento.
+   */
+  private treemapConfig(fallback: string[], surface: string, fmt: (v: number) => string): ChartConfiguration {
+    const s = this.series()[0];
+    const colors = Array.isArray(s?.color) ? s.color : null;
+    const tree: TreemapNode[] = this.labels().map((label, index) => ({
+      label,
+      index,
+      value: s?.data[index] ?? 0,
+      color: colors?.[index] ?? fallback[index % fallback.length]!,
+    }));
+    const node = (ctx: { raw?: { _data?: TreemapNode } }) => ctx.raw?._data;
+
+    return {
+      type: 'treemap' as ChartType,
+      data: {
+        datasets: [
+          {
+            label: s?.label ?? '',
+            tree,
+            key: 'value',
+            spacing: 2,
+            borderWidth: 2,
+            borderRadius: 8,
+            borderColor: surface,
+            backgroundColor: (ctx: { raw?: { _data?: TreemapNode } }) => node(ctx)?.color ?? fallback[0]!,
+            labels: {
+              display: true,
+              align: 'left',
+              position: 'top',
+              overflow: 'fit',
+              padding: 8,
+              color: (ctx: { raw?: { _data?: TreemapNode } }) => readableOn(node(ctx)?.color ?? '#000000'),
+              font: [{ size: 12, weight: 'bold' }, { size: 11 }],
+              formatter: (ctx: { raw?: { _data?: TreemapNode } }) => {
+                const n = node(ctx);
+                return n ? [n.label, fmt(n.value)] : '';
+              },
+            },
+          },
+        ],
+      } as unknown as ChartConfiguration['data'],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 450 },
+        onClick: (_e, elements) => {
+          const n = (elements[0]?.element as unknown as { $context?: { raw?: { _data?: TreemapNode } } })?.$context?.raw?._data;
+          if (n) this.select(n.index);
+        },
+        onHover: (e, elements) => {
+          const target = e.native?.target as HTMLElement | undefined;
+          if (target) target.style.cursor = elements.length ? 'pointer' : 'default';
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => (items[0]?.raw as { _data?: TreemapNode })?._data?.label ?? '',
+              label: (item) => ` ${s?.label}: ${fmt(((item.raw as { _data?: TreemapNode })?._data?.value) ?? 0)}`,
+            },
+          },
+        },
       } as ChartConfiguration['options'],
     };
   }
