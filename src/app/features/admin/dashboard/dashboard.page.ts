@@ -120,12 +120,33 @@ export class DashboardPage {
   /** El donut de categorías ignora el filtro de categoría (para poder cambiarlo desde él). */
   private readonly sinCategoria = computed(() => filtrarLineas(this.value().lineas, { ...this.filtro(), categoriaId: null }));
 
+  /** Top de productos para el treemap: área = facturación, color = categoría del producto. */
   protected readonly topProductos = computed(() => {
-    const g = agrupar(this.actuales(), (l) => l.producto_id, (l) => l.producto, 8);
-    return { labels: g.map((x) => x.label), data: g.map((x) => Math.round(x.total)) };
+    const g = agrupar(this.actuales(), (l) => l.producto_id, (l) => l.producto, 10);
+    const colores = new Map(this.categorias().map((c) => [c.id, c.color]));
+    const categoriaDe = new Map(this.value().lineas.map((l) => [l.producto_id, l.categoria_id]));
+    return {
+      ids: g.map((x) => x.key),
+      labels: g.map((x) => x.label),
+      data: g.map((x) => Math.round(x.total)),
+      colors: g.map((x) => colores.get(categoriaDe.get(x.key) ?? -1) ?? '#2f3fb8'),
+    };
   });
 
-  protected readonly porEstado = computed(() => ({ labels: this.estados.map(capitalize), data: pedidosPorEstado(this.sinEstado()) }));
+  /** Colores semánticos por estado (los mismos tonos que las etiquetas de estado). */
+  private readonly coloresEstado: Record<PedidoEstado, string> = {
+    pendiente: '#d97706',
+    aprobado: '#2563eb',
+    enviado: '#7c3aed',
+    entregado: '#16a34a',
+    cancelado: '#64748b',
+  };
+
+  protected readonly porEstado = computed(() => ({
+    labels: this.estados.map(capitalize),
+    data: pedidosPorEstado(this.sinEstado()),
+    colors: this.estados.map((e) => this.coloresEstado[e]),
+  }));
 
   protected readonly criticos = computed(() =>
     stockCritico(this.value().productos).map((p) => ({ ...p, categoria_nombre: p.categoria?.nombre ?? '', nivel: p.stock <= 0 ? 'agotado' : 'bajo' })),
@@ -184,6 +205,12 @@ export class DashboardPage {
   protected onEstado(sel: ChartSelection): void {
     const e = this.estados[sel.index];
     if (e) this.toggleEstado(e);
+  }
+
+  /** Drill-down desde el treemap: abre la ficha del producto. */
+  protected onTopProducto(sel: ChartSelection): void {
+    const id = this.topProductos().ids[sel.index];
+    if (id !== undefined) void this.router.navigate(['/app/productos', id]);
   }
 
   protected onProductoCritico(p: Producto): void {

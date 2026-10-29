@@ -35,6 +35,7 @@
     "@ngrx/signals": "^22.0.1",
     "@supabase/supabase-js": "^2.118.0",
     "chart.js": "^4.6.1",
+    "chartjs-chart-treemap": "^4.2.2",
     "ionicons": "^8.1.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.9",
