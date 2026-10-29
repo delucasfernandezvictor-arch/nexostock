@@ -17,6 +17,109 @@
 
 .auth-foot { margin: 1.25rem 0 0; text-align: center; color: var(--app-muted); }
 
+// --- Casillas: el texto de la etiqueta puede ocupar varias líneas
+.check {
+  display: block;
+  margin: 0.25rem 0 0.9rem;
+  &::part(label) { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.4; }
+}
+.check-help { margin: -0.5rem 0 1rem 2.1rem; font-size: 0.875rem; }
+
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--app-text-primary);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+  &:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; border-radius: 0.2rem; }
+}
+
+// --- Modal de la política de uso de datos
+.modal-title { margin: 0; font-size: 1.1rem; font-weight: 700; }
+.terms {
+  h3 { margin: 1.1rem 0 0.35rem; font-size: 1rem; }
+  p, li { line-height: 1.55; }
+  ul { padding-left: 1.2rem; }
+}
+.terms-intro {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+  background: var(--app-badge-info-bg);
+  color: var(--app-badge-info-fg);
+  ion-icon { flex: none; font-size: 1.4rem; }
+}
+.terms-note { margin-top: 1.25rem; font-size: 0.875rem; color: var(--app-muted); font-style: italic; }
+.terms-actions { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0.35rem 0.75rem; }
+
+// --- Cuenta demo cargada
+.demo-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--app-badge-primary-bd);
+  background: var(--app-badge-primary-bg);
+  color: var(--app-badge-primary-fg);
+  font-size: 0.875rem;
+  animation: badge-in 0.25s ease-out;
+}
+.demo-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.8125rem;
+}
+.demo-badge-text { flex: 1; min-width: 0; line-height: 1.35; }
+.demo-badge-label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.demo-badge-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  font-size: 1.3rem;
+  cursor: pointer;
+  &:hover { background: rgb(0 0 0 / 6%); }
+  &:focus-visible { outline: 3px solid var(--app-focus); }
+}
+
+// --- Efecto mientras se «teclean» las credenciales
+.field.autofill { --border-color: var(--ion-color-primary); --highlight-color-focused: var(--ion-color-primary); animation: glow 1s ease-in-out infinite alternate; border-radius: 0.3rem; }
+.submit.ready { animation: pulse 1.6s ease-out 2; }
+
+@keyframes glow {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ion-color-primary) 0%, transparent); }
+  to { box-shadow: 0 0 0 4px color-mix(in srgb, var(--ion-color-primary) 25%, transparent); }
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ion-color-primary) 55%, transparent); border-radius: 0.3rem; }
+  100% { box-shadow: 0 0 0 14px transparent; border-radius: 0.3rem; }
+}
+@keyframes badge-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field.autofill, .submit.ready, .demo-badge { animation: none; }
+}
+
 .checks {
   list-style: none;
   margin: -0.5rem 0 1rem;

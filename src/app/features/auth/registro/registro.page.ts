@@ -3,13 +3,17 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
-  IonButton, IonCheckbox, IonContent, IonIcon, IonInput, IonInputPasswordToggle, IonSelect, IonSelectOption, IonSpinner,
+  IonButton, IonButtons, IonCheckbox, IonContent, IonFooter, IonHeader, IonIcon, IonInput, IonInputPasswordToggle, IonModal, IonSelect,
+  IonSelectOption, IonSpinner, IonTitle, IonToolbar,
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { checkmarkCircle, closeCircle, ellipseOutline, personAddOutline, alertCircleOutline, mailOpenOutline } from 'ionicons/icons';
+import {
+  checkmarkCircle, closeCircle, closeOutline, ellipseOutline, personAddOutline, alertCircleOutline, mailOpenOutline, shieldCheckmarkOutline,
+} from 'ionicons/icons';
 import { map, startWith } from 'rxjs';
 import { UsuariosService } from '../../../core/services/usuarios.service';
 import { AuthStore } from '../../../core/state/auth.store';
+import { setRememberedEmail } from '../../../core/utils/remember';
 import { errorText, matchFields, remoteUniqueValidator, strongPassword } from '../../../core/validators/validators';
 import { AuthLayoutComponent } from '../auth-layout.component';
 
@@ -23,6 +27,9 @@ export const DEPARTAMENTOS = ['Administración', 'Compras', 'Logística', 'Marke
  *
  * El estado `PENDING` del control se expone como señal para mostrar un
  * indicador de "Comprobando…" y bloquear el envío hasta que termine.
+ *
+ * Incluye la aceptación de la política de uso de datos (con su texto en un
+ * modal) y la opción «Recordar mi email en este dispositivo».
  */
 @Component({
   selector: 'app-registro',
@@ -31,7 +38,7 @@ export const DEPARTAMENTOS = ['Administración', 'Compras', 'Logística', 'Marke
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ReactiveFormsModule, RouterLink, IonContent, IonInput, IonInputPasswordToggle, IonButton, IonIcon, IonSpinner, IonSelect,
-    IonSelectOption, IonCheckbox, AuthLayoutComponent,
+    IonSelectOption, IonCheckbox, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonFooter, AuthLayoutComponent,
   ],
 })
 export class RegistroPage {
@@ -43,6 +50,8 @@ export class RegistroPage {
   protected readonly departamentos = DEPARTAMENTOS;
   protected readonly errorText = errorText;
   protected readonly confirmationSent = signal(false);
+  /** Modal con la política de uso de datos */
+  protected readonly termsOpen = signal(false);
 
   protected readonly form = this.fb.nonNullable.group(
     {
@@ -56,6 +65,7 @@ export class RegistroPage {
       password: ['', [Validators.required, strongPassword]],
       confirm: ['', Validators.required],
       acepta: [false, Validators.requiredTrue],
+      recordar: [false],
     },
     { validators: matchFields('password', 'confirm') },
   );
@@ -83,12 +93,19 @@ export class RegistroPage {
   });
 
   constructor() {
-    addIcons({ checkmarkCircle, closeCircle, ellipseOutline, personAddOutline, alertCircleOutline, mailOpenOutline });
+    addIcons({ checkmarkCircle, closeCircle, closeOutline, ellipseOutline, personAddOutline, alertCircleOutline, mailOpenOutline, shieldCheckmarkOutline });
     this.auth.clearError();
   }
 
   protected emailError(): string {
     return errorText(this.form.controls.email.errors, { emailTaken: 'Ya existe una cuenta con este email' });
+  }
+
+  /** Acepta la política desde el modal (equivale a marcar la casilla). */
+  protected acceptTerms(): void {
+    this.form.controls.acepta.setValue(true);
+    this.form.controls.acepta.markAsTouched();
+    this.termsOpen.set(false);
   }
 
   protected confirmError(): string {
@@ -102,8 +119,9 @@ export class RegistroPage {
       return;
     }
     try {
-      const { nombre, email, departamento, password } = this.form.getRawValue();
+      const { nombre, email, departamento, password, recordar } = this.form.getRawValue();
       const { needsConfirmation } = await this.auth.register({ nombre, email, departamento, password });
+      setRememberedEmail(email, recordar);
       if (needsConfirmation) this.confirmationSent.set(true);
       else await this.router.navigateByUrl('/app/inicio', { replaceUrl: true });
     } catch {

@@ -23,7 +23,9 @@ export const AYUDA: SeccionAyuda[] = [
     icon: 'log-in-outline',
     pasos: [
       'Entra con tu email corporativo y contraseña desde la pantalla «Inicia sesión».',
-      'Si no tienes cuenta, pulsa «Crea una cuenta». El sistema comprueba al momento si tu email ya está registrado.',
+      'Para probar la aplicación, usa el «Acceso rápido de demostración»: la tarjeta Administrador o el desplegable Usuario rellenan las credenciales por ti; después pulsa Entrar.',
+      'Marca «Recordar mi email en este dispositivo» para que el email aparezca ya escrito la próxima vez (nunca se guarda la contraseña).',
+      'Si no tienes cuenta, pulsa «Crea una cuenta». El sistema comprueba al momento si tu email ya está registrado. Puedes leer la política de uso de datos antes de aceptarla y volver al inicio de sesión con el enlace superior.',
       'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número. La lista de requisitos se marca mientras escribes.',
       'Las cuentas nuevas son de «Usuario estándar». Un administrador puede concederte el rol «Administrador».',
       'Tu sesión se mantiene al recargar y se renueva sola. Si caduca, se te pedirá iniciar sesión de nuevo y volverás a la pantalla en la que estabas.',

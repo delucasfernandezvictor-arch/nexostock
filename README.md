@@ -36,7 +36,7 @@ Aplicación de gestión empresarial **multiplataforma (PWA / híbrida)** para co
 
 | Rol | Funcionalidad |
 |---|---|
-| **Todos** | Login y registro con **validación asíncrona del email**, catálogo con búsqueda y filtros, carrito persistente, alta de pedidos, seguimiento en tiempo real, informes **PDF / CSV**, ayuda integrada y preferencias de accesibilidad |
+| **Todos** | Login con **acceso rápido de demostración** y «recordar mi email», registro con **validación asíncrona del email** y política de uso de datos, catálogo con búsqueda y filtros, carrito persistente, alta de pedidos, seguimiento en tiempo real, informes **PDF / CSV**, ayuda integrada y preferencias de accesibilidad |
 | **Usuario estándar** | Ve y exporta **solo sus pedidos**; puede cancelar sus pedidos pendientes |
 | **Administrador** | **Cuadro de mando** interactivo con gráficos, alta y edición de productos (**validación asíncrona del SKU**), gestión del ciclo de vida de todos los pedidos, gestión de roles, publicación de avisos en tiempo real y feed de actividad |
 
@@ -89,6 +89,7 @@ El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasf
   - `guestGuard`: impide volver al login con sesión iniciada.
 - **El control real está en el servidor**: **Row Level Security** en todas las tablas y funciones `SECURITY DEFINER` que validan el rol. Aunque se manipule el cliente, un usuario estándar no puede leer pedidos ajenos, crear productos ni cambiar roles. Se ha comprobado con peticiones directas a la API (código `42501`).
 - **Ningún secreto en el repositorio**: la URL y la clave *publishable* se inyectan en tiempo de build desde variables de entorno (`scripts/set-env.mjs`). `.env` y `runtime-env.ts` están en `.gitignore`. Las credenciales de prueba solo aparecen en el PDF de entrega.
+- **Acceso rápido de demostración**: el login ofrece las cuentas demo con un clic (administrador y un desplegable de usuarios). Sus contraseñas tampoco están en el código: llegan de las variables `DEMO_ADMIN_PASSWORD` y `DEMO_USER_PASSWORD`; si no se definen, el panel no aparece. «Recordar mi email» guarda solo el email en el dispositivo, nunca la contraseña.
 - **Prevención de *open redirect*** en el login, **neutralización de inyección de fórmulas** en los CSV y cabeceras de seguridad (`HSTS`, `X-Frame-Options`, `nosniff`...) en `vercel.json`.
 - **Datos sintéticos**: dominio reservado `example.com` (RFC 2606). No hay datos personales reales.
 
@@ -119,7 +120,8 @@ El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasf
 4. **Datos sintéticos.** Ejecuta `supabase/seed.sql`. Promociona al administrador y genera 36 productos, 240 pedidos y avisos.
 5. **Variables de entorno.**
    ```bash
-   cp .env.example .env      # y rellena SUPABASE_URL y SUPABASE_ANON_KEY (Project Settings › API)
+   cp .env.example .env      # rellena SUPABASE_URL y SUPABASE_ANON_KEY (Project Settings › API)
+                             # y, opcionalmente, DEMO_ADMIN_PASSWORD / DEMO_USER_PASSWORD
    npm ci
    npm start                 # http://localhost:4200
    ```
@@ -130,7 +132,7 @@ El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasf
 |---|---|
 | `npm start` | Servidor de desarrollo |
 | `npm run build` | Build de producción en `www/`: PWA con service worker y *hashing* |
-| `npm test` / `npm run test:ci` | Tests unitarios con **Vitest**: 43 tests de guards (incluida la integración con el router), stores, validadores, utilidades, interceptores y DataTable |
+| `npm test` / `npm run test:ci` | Tests unitarios con **Vitest**: 50 tests de guards (incluida la integración con el router), stores, validadores, utilidades, interceptores, DataTable y acceso demo |
 | `npm run lint` | ESLint + angular-eslint |
 | `npm run docs` | Documentación técnica con **Compodoc** en `documentation/` |
 | `npm run vercel-build` | Pipeline de despliegue: tests → build → docs en `www/docs` |
@@ -150,7 +152,7 @@ El historial (`git log --graph --oneline --all`) muestra cada rama de caracterí
 
 - **GitHub Actions** ([ci.yml](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/.github/workflows/ci.yml)) se ejecuta en cada push y en cada PR. Pasa lint, tests, build de producción y Compodoc, y guarda la documentación como artefacto.
 - **Vercel** está conectado al repositorio: cada push a `main` despliega a producción y cada PR genera un *preview*. Su comando de build es `npm run vercel-build`, que **ejecuta los tests primero**: si fallan, **el despliegue se bloquea**.
-- Variables en Vercel (*Settings › Environment Variables*): `SUPABASE_URL` y `SUPABASE_ANON_KEY`.
+- Variables en Vercel (*Settings › Environment Variables*): `SUPABASE_URL` y `SUPABASE_ANON_KEY`, más `DEMO_ADMIN_PASSWORD` y `DEMO_USER_PASSWORD` si se quiere activar el acceso rápido de demostración.
 - La documentación de Compodoc se publica junto a la app en `/docs/index.html`.
 
 ## Accesibilidad y calidad

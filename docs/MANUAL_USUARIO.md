@@ -35,14 +35,25 @@ Funciona en cualquier navegador moderno (ordenador, tablet o móvil) y se puede 
 2. Escribe tu email corporativo y tu contraseña. Puedes mostrar u ocultar la contraseña con el icono del ojo.
 3. Pulsa **Entrar**. Si el email o la contraseña no son correctos, verás un aviso en rojo bajo el formulario.
 
+Marca **Recordar mi email en este dispositivo** para que la próxima vez el email aparezca ya escrito. Solo se guarda el email, nunca la contraseña.
+
 La sesión se mantiene aunque cierres el navegador. Si caduca, la app te pedirá entrar de nuevo y te devolverá a la pantalla en la que estabas.
+
+#### Acceso rápido de demostración
+Debajo del botón **Entrar** hay un panel para probar la aplicación sin escribir credenciales:
+- **Modo · Administrador**: rellena automáticamente el email y la contraseña de la cuenta de administrador.
+- **Modo · Usuario**: abre un desplegable con las cuentas de usuario estándar (nombre, departamento y email). Elige una con el ratón o con las flechas y Enter.
+
+Las credenciales se escriben solas en el formulario y aparece una etiqueta con la cuenta cargada (pulsa **×** para quitarla). Después pulsa **Entrar**.
 
 ### 3.2 Crear una cuenta
 1. En la pantalla de acceso pulsa **Crea una cuenta de usuario**.
 2. Rellena nombre, email, departamento y contraseña.
    - Mientras escribes el email, la app **comprueba si ya está registrado** y te indica «Email disponible» o «Email ya registrado».
    - La contraseña debe tener **8 caracteres o más, una mayúscula, una minúscula y un número**. La lista de requisitos se marca en verde a medida que los cumples.
-3. Acepta la política de uso de datos y pulsa **Crear cuenta**.
+3. Pulsa **Leer la política de uso de datos** para ver el texto completo. Puedes aceptarla desde la propia ventana con **He leído y acepto** o marcando la casilla.
+4. Si quieres, marca **Recordar mi email en este dispositivo**.
+5. Pulsa **Crear cuenta**. Si cambias de idea, usa **← Volver al inicio de sesión** en la parte superior.
 
 ### 3.3 Cerrar sesión
 Abre el menú lateral y pulsa **Cerrar sesión**, abajo del todo.
