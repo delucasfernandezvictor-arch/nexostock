@@ -121,6 +121,7 @@ export const AYUDA: SeccionAyuda[] = [
       'Desde el catálogo pulsa «Nuevo producto» o el icono del lápiz de un producto.',
       'El SKU sigue el formato AAA-0000 y debe ser único. Se comprueba contra la base de datos mientras escribes.',
       'Define el stock mínimo: cuando el stock baje de ese valor se generará una alerta en el cuadro de mando.',
+      'Añade una imagen arrastrándola a la zona punteada o con «Elegir imagen». Se optimiza automáticamente (800 px, WebP) y se guarda en Supabase Storage al pulsar Guardar.',
       'Desactiva un producto para ocultarlo del catálogo sin perder su histórico. Eliminarlo solo es posible si no tiene pedidos.',
     ],
   },

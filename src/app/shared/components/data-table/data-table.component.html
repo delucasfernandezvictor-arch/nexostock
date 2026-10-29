@@ -63,6 +63,12 @@
                 <td [attr.data-label]="columns()[i]!.label" [class]="'al-' + align(columns()[i]!)" [class.hide-mobile]="columns()[i]!.hideOnMobile">
                   @if (columns()[i]!.type === 'badge') {
                     <app-status-badge [value]="cell.text" />
+                  } @else if (columns()[i]!.type === 'image') {
+                    @if (cell.text && cell.text !== '—') {
+                      <img class="thumb" [src]="cell.text" alt="" loading="lazy" decoding="async" width="56" height="42" />
+                    } @else {
+                      <span class="thumb thumb-empty" aria-hidden="true"></span>
+                    }
                   } @else {
                     {{ cell.text }}
                   }
