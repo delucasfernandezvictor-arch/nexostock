@@ -7,9 +7,23 @@
       </p>
     }
 
+    @if (demoSelected(); as d) {
+      <div class="demo-badge" role="status">
+        <span class="demo-avatar" [style.background]="d.color" aria-hidden="true">{{ initials(d.nombre) }}</span>
+        <span class="demo-badge-text">
+          <span class="demo-badge-label">{{ filling() ? 'Cargando cuenta de demostración…' : 'Cuenta de demostración' }}</span>
+          <strong>{{ d.nombre }}</strong> · {{ d.role === 'admin' ? 'Administrador' : 'Usuario estándar' }}
+        </span>
+        <button type="button" class="demo-badge-close" (click)="clearDemo()" aria-label="Quitar la cuenta de demostración">
+          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </div>
+    }
+
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate aria-describedby="login-help">
       <ion-input
         class="field"
+        [class.autofill]="filling()"
         fill="outline"
         label="Email corporativo"
         labelPlacement="stacked"
@@ -25,6 +39,7 @@
 
       <ion-input
         class="field"
+        [class.autofill]="filling()"
         fill="outline"
         label="Contraseña"
         labelPlacement="stacked"
@@ -37,13 +52,18 @@
         <ion-input-password-toggle slot="end" showLabel="Mostrar contraseña" hideLabel="Ocultar contraseña"></ion-input-password-toggle>
       </ion-input>
 
+      <ion-checkbox class="check" formControlName="remember" labelPlacement="end" justify="start">
+        Recordar mi email en este dispositivo
+      </ion-checkbox>
+
       @if (auth.error(); as error) {
         <p class="form-alert error" role="alert">
           <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>{{ error }}
         </p>
       }
 
-      <ion-button type="submit" expand="block" class="submit" [disabled]="auth.loading()">
+      <ion-button #submitButton type="submit" expand="block" class="submit" [class.ready]="demoSelected() && !filling()"
+        [disabled]="auth.loading() || filling()">
         @if (auth.loading()) {
           <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
           <span class="sr-only">Iniciando sesión…</span>
@@ -53,6 +73,9 @@
         }
       </ion-button>
     </form>
+
+    <app-demo-access [accounts]="demoAccounts" [disabled]="auth.loading()" [selectedEmail]="demoSelected()?.email ?? null"
+      (pick)="fillDemo($event)" />
 
     <p id="login-help" class="auth-foot">
       ¿No tienes cuenta? <a routerLink="/registro">Crea una cuenta de usuario</a>

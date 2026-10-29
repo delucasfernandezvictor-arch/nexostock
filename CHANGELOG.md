@@ -2,6 +2,26 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [1.2.0] - 2026-10-29
+
+### Añadido
+- Acceso rápido de demostración en el login: tarjeta de administrador y desplegable accesible (patrón *listbox* WAI-ARIA) con las cuentas de usuario; rellena las credenciales con animación de tecleo.
+- Contraseñas demo inyectadas desde variables de entorno (`DEMO_ADMIN_PASSWORD`, `DEMO_USER_PASSWORD`), nunca en el repositorio.
+- «Recordar mi email en este dispositivo» en el login y el registro (solo el email).
+- Política de uso de datos en un modal desde el registro y enlace «Volver al inicio de sesión».
+- Componente reutilizable `app-demo-access` y 7 tests nuevos (50 en total).
+
+### Corregido
+- El texto de la casilla de aceptación del registro ya no se corta.
+
+## [1.1.0] - 2026-10-26
+
+### Añadido
+- Guards con defensa en profundidad (`canMatch` + `canActivate`) y `pendingChangesGuard` (`canDeactivate`).
+
+### Corregido
+- La URL de retorno tras el login conserva la ruta completa y sus parámetros.
+
 ## [1.0.0] - 2026-10-25
 
 ### Añadido
@@ -17,5 +37,5 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 - Informes PDF (jsPDF y autotable) y CSV (RFC 4180).
 - Accesibilidad WCAG 2.2 AA: tema claro y oscuro, alto contraste, escala de texto, navegación por teclado y ARIA.
 - PWA: manifest, iconos y service worker.
-- 43 tests unitarios con Vitest, CI en GitHub Actions, despliegue en Vercel y Compodoc.
+- 35 tests unitarios con Vitest, CI en GitHub Actions, despliegue en Vercel y Compodoc.
 - Manual de usuario en Markdown e integrado en la app.
