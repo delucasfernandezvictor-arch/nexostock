@@ -13,7 +13,7 @@ import {
 import { map, startWith } from 'rxjs';
 import { UsuariosService } from '../../../core/services/usuarios.service';
 import { AuthStore } from '../../../core/state/auth.store';
-import { setRememberedEmail } from '../../../core/utils/remember';
+import { rememberAccount } from '../../../core/utils/remember';
 import { errorText, matchFields, remoteUniqueValidator, strongPassword } from '../../../core/validators/validators';
 import { AuthLayoutComponent } from '../auth-layout.component';
 
@@ -29,7 +29,7 @@ export const DEPARTAMENTOS = ['Administración', 'Compras', 'Logística', 'Marke
  * indicador de "Comprobando…" y bloquear el envío hasta que termine.
  *
  * Incluye la aceptación de la política de uso de datos (con su texto en un
- * modal) y la opción «Recordar mi email en este dispositivo».
+ * modal) y la opción «Recordar mi cuenta en este dispositivo».
  */
 @Component({
   selector: 'app-registro',
@@ -121,7 +121,7 @@ export class RegistroPage {
     try {
       const { nombre, email, departamento, password, recordar } = this.form.getRawValue();
       const { needsConfirmation } = await this.auth.register({ nombre, email, departamento, password });
-      setRememberedEmail(email, recordar);
+      rememberAccount({ email, nombre, departamento, role: 'user' }, recordar);
       if (needsConfirmation) this.confirmationSent.set(true);
       else await this.router.navigateByUrl('/app/inicio', { replaceUrl: true });
     } catch {

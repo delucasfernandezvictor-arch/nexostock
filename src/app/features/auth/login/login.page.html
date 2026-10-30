@@ -11,10 +11,10 @@
       <div class="demo-badge" role="status">
         <span class="demo-avatar" [style.background]="d.color" aria-hidden="true">{{ initials(d.nombre) }}</span>
         <span class="demo-badge-text">
-          <span class="demo-badge-label">{{ filling() ? 'Cargando cuenta de demostración…' : 'Cuenta de demostración' }}</span>
+          <span class="demo-badge-label">{{ filling() ? 'Cargando cuenta…' : d.recordada ? 'Cuenta recordada en este dispositivo' : 'Cuenta de demostración' }}</span>
           <strong>{{ d.nombre }}</strong> · {{ d.role === 'admin' ? 'Administrador' : 'Usuario estándar' }}
         </span>
-        <button type="button" class="demo-badge-close" (click)="clearDemo()" aria-label="Quitar la cuenta de demostración">
+        <button type="button" class="demo-badge-close" (click)="clearDemo()" aria-label="Quitar la cuenta cargada">
           <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
         </button>
       </div>
@@ -38,6 +38,7 @@
       </ion-input>
 
       <ion-input
+        #passwordInput
         class="field"
         [class.autofill]="filling()"
         fill="outline"
@@ -53,7 +54,7 @@
       </ion-input>
 
       <ion-checkbox class="check" formControlName="remember" labelPlacement="end" justify="start">
-        Recordar mi email en este dispositivo
+        Recordar mi cuenta en este dispositivo
       </ion-checkbox>
 
       @if (auth.error(); as error) {

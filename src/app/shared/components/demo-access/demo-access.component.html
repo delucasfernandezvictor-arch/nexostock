@@ -1,7 +1,7 @@
 @if (accounts().length) {
   <section class="demo" [attr.aria-labelledby]="uid + '-title'">
     <div class="demo-divider">
-      <span [id]="uid + '-title'">Acceso rápido de demostración</span>
+      <span [id]="uid + '-title'">{{ admin() || demoUsers().length ? 'Acceso rápido de demostración' : 'Acceso rápido' }}</span>
     </div>
 
     <div class="demo-grid">
@@ -50,40 +50,69 @@
         </button>
 
         @if (open()) {
-          <ul
+          <div
             #list
             class="menu"
             role="listbox"
-            tabindex="-1"
+            tabindex="0"
             [id]="uid + '-list'"
-            aria-label="Cuentas de usuario estándar"
+            aria-label="Cuentas de usuario"
             [attr.aria-activedescendant]="optionId(active())"
             (keydown)="onListKey($event)">
-            @for (u of users(); track u.email; let i = $index) {
-              <li
-                role="option"
-                class="option"
-                [id]="optionId(i)"
-                [class.active]="i === active()"
-                [attr.aria-selected]="u.email === selectedEmail()"
-                (mouseenter)="active.set(i)"
-                (click)="choose(u)">
-                <span class="avatar" [style.background]="u.color" aria-hidden="true">{{ initials(u.nombre) }}</span>
-                <span class="opt-text">
-                  <span class="opt-name">{{ u.nombre }}</span>
-                  <span class="opt-email">{{ u.email }}</span>
+            @if (recordadas().length) {
+              <div role="group" class="group" [attr.aria-labelledby]="uid + '-g-rec'">
+                <span class="group-label" [id]="uid + '-g-rec'">
+                  <ion-icon name="phone-portrait-outline" aria-hidden="true"></ion-icon> Recordadas en este dispositivo
                 </span>
-                <span class="chip">{{ u.departamento }}</span>
-                @if (u.email === selectedEmail()) {
-                  <ion-icon class="opt-check" name="checkmark-circle" aria-hidden="true"></ion-icon>
-                }
-              </li>
+                <div>
+                  @for (u of recordadas(); track u.email; let i = $index) {
+                    <ng-container *ngTemplateOutlet="opt; context: { $implicit: u, i: i }" />
+                  }
+                </div>
+              </div>
             }
-          </ul>
+            @if (demoUsers().length) {
+              <div role="group" class="group" [attr.aria-labelledby]="uid + '-g-demo'">
+                <span class="group-label" [id]="uid + '-g-demo'">Cuentas de demostración</span>
+                <div>
+                  @for (u of demoUsers(); track u.email; let i = $index) {
+                    <ng-container *ngTemplateOutlet="opt; context: { $implicit: u, i: i + recordadas().length }" />
+                  }
+                </div>
+              </div>
+            }
+          </div>
         }
+
+        <ng-template #opt let-u let-i="i">
+          <div
+            role="option"
+            class="option"
+            [id]="optionId(i)"
+            [class.active]="i === active()"
+            [attr.aria-selected]="u.email === selectedEmail()"
+            (mouseenter)="active.set(i)"
+            (click)="choose(u)">
+            <span class="avatar" [style.background]="u.color" aria-hidden="true">{{ initials(u.nombre) }}</span>
+            <span class="opt-text">
+              <span class="opt-name">{{ u.nombre }}</span>
+              <span class="opt-email">{{ u.email }}</span>
+            </span>
+            <span class="chip">{{ u.departamento }}</span>
+            @if (u.email === selectedEmail()) {
+              <ion-icon class="opt-check" name="checkmark-circle" aria-hidden="true"></ion-icon>
+            }
+          </div>
+        </ng-template>
       </div>
     </div>
 
-    <p class="demo-note">Cuentas con datos sintéticos. Se rellenan el email y la contraseña; después pulsa <strong>Entrar</strong>.</p>
+    <p class="demo-note">
+      @if (recordadas().length) {
+        Las cuentas demo rellenan email y contraseña; en las recordadas solo se rellena el email (la contraseña nunca se guarda).
+      } @else {
+        Cuentas con datos sintéticos. Se rellenan el email y la contraseña; después pulsa <strong>Entrar</strong>.
+      }
+    </p>
   </section>
 }

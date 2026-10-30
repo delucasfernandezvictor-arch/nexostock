@@ -1,17 +1,19 @@
 import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { IonIcon } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { chevronDown, checkmarkCircle, flash, peopleOutline, shieldCheckmark } from 'ionicons/icons';
-import { DemoCredentials, initials } from '../../../core/config/demo-accounts';
+import { chevronDown, checkmarkCircle, peopleOutline, phonePortraitOutline, shieldCheckmark } from 'ionicons/icons';
+import { QuickAccount, initials } from '../../../core/config/demo-accounts';
 
 let nextId = 0;
 
 /**
- * **`<app-demo-access>`** — panel de acceso rápido a las cuentas de demostración.
+ * **`<app-demo-access>`** — panel de acceso rápido del login.
  *
  * - Tarjeta **Modo administrador**: un clic emite la cuenta de administrador.
  * - Tarjeta **Modo usuario**: abre un desplegable propio con avatar, nombre,
- *   departamento y email de cada cuenta de usuario estándar.
+ *   departamento y email de cada cuenta, en dos grupos: las **recordadas en
+ *   este dispositivo** (sin contraseña) y las **cuentas de demostración**.
  *
  * El desplegable sigue el patrón *listbox* de WAI-ARIA: se abre con clic, Enter,
  * Espacio o flecha abajo; se recorre con flechas, Inicio y Fin; se elige con
@@ -24,36 +26,41 @@ let nextId = 0;
   templateUrl: './demo-access.component.html',
   styleUrls: ['./demo-access.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonIcon],
+  imports: [IonIcon, NgTemplateOutlet],
   host: { '(document:click)': 'onDocumentClick($event)' },
 })
 export class DemoAccessComponent {
   /** Cuentas disponibles (si está vacío, el componente no muestra nada) */
-  readonly accounts = input.required<readonly DemoCredentials[]>();
+  readonly accounts = input.required<readonly QuickAccount[]>();
   /** Desactiva las tarjetas (p. ej. mientras se rellena o se inicia sesión) */
   readonly disabled = input(false);
   /** Email de la cuenta elegida actualmente (para marcarla) */
   readonly selectedEmail = input<string | null>(null);
 
   /** Se emite al elegir una cuenta */
-  readonly pick = output<DemoCredentials>();
+  readonly pick = output<QuickAccount>();
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly trigger = viewChild<ElementRef<HTMLButtonElement>>('trigger');
-  private readonly list = viewChild<ElementRef<HTMLUListElement>>('list');
+  private readonly list = viewChild<ElementRef<HTMLDivElement>>('list');
 
   protected readonly uid = `demo-${++nextId}`;
   protected readonly open = signal(false);
   protected readonly active = signal(0);
   protected readonly initials = initials;
 
-  protected readonly admin = computed(() => this.accounts().find((a) => a.role === 'admin') ?? null);
-  protected readonly users = computed(() => this.accounts().filter((a) => a.role === 'user'));
+  protected readonly admin = computed(() => this.accounts().find((a) => !a.recordada && a.role === 'admin') ?? null);
+  /** Cuentas recordadas en este dispositivo (primer grupo del desplegable) */
+  protected readonly recordadas = computed(() => this.accounts().filter((a) => a.recordada));
+  /** Cuentas demo de usuario estándar (segundo grupo) */
+  protected readonly demoUsers = computed(() => this.accounts().filter((a) => !a.recordada && a.role === 'user'));
+  /** Opciones del desplegable en orden (para el teclado y aria-activedescendant) */
+  protected readonly users = computed(() => [...this.recordadas(), ...this.demoUsers()]);
   protected readonly selectedUser = computed(() => this.users().find((u) => u.email === this.selectedEmail()) ?? null);
   protected readonly adminSelected = computed(() => !!this.admin() && this.admin()!.email === this.selectedEmail());
 
   constructor() {
-    addIcons({ chevronDown, checkmarkCircle, flash, peopleOutline, shieldCheckmark });
+    addIcons({ chevronDown, checkmarkCircle, peopleOutline, phonePortraitOutline, shieldCheckmark });
   }
 
   protected toggle(): void {
@@ -61,7 +68,7 @@ export class DemoAccessComponent {
     else this.openList();
   }
 
-  protected choose(account: DemoCredentials): void {
+  protected choose(account: QuickAccount): void {
     if (this.disabled()) return;
     this.close(false);
     this.pick.emit(account);
