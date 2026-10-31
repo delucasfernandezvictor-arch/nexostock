@@ -36,9 +36,9 @@ Aplicación de gestión empresarial **multiplataforma (PWA / híbrida)** para co
 
 | Rol | Funcionalidad |
 |---|---|
-| **Todos** | Login con **acceso rápido de demostración** y «recordar mi email», registro con **validación asíncrona del email** y política de uso de datos, catálogo con búsqueda y filtros, carrito persistente, alta de pedidos, seguimiento en tiempo real, informes **PDF / CSV**, ayuda integrada y preferencias de accesibilidad |
+| **Todos** | Login con **acceso rápido de demostración** y «recordar mi cuenta», registro con **validación asíncrona del email** y política de uso de datos, catálogo con búsqueda y filtros, carrito persistente, alta de pedidos, seguimiento en tiempo real, informes **PDF / CSV**, ayuda integrada y preferencias de accesibilidad |
 | **Usuario estándar** | Ve y exporta **solo sus pedidos**; puede cancelar sus pedidos pendientes |
-| **Administrador** | **Cuadro de mando** interactivo con gráficos, alta y edición de productos (**validación asíncrona del SKU**), gestión del ciclo de vida de todos los pedidos, gestión de roles, publicación de avisos en tiempo real y feed de actividad |
+| **Administrador** | **Cuadro de mando** interactivo con gráficos, alta y edición de productos (**validación asíncrona del SKU**), gestión del ciclo de vida de todos los pedidos, gestión de roles, publicación de avisos en tiempo real, feed de actividad y **Nexa**, la asistente por voz con el resumen del día |
 
 ## Arquitectura
 
@@ -135,7 +135,7 @@ El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasf
 |---|---|
 | `npm start` | Servidor de desarrollo |
 | `npm run build` | Build de producción en `www/`: PWA con service worker y *hashing* |
-| `npm test` / `npm run test:ci` | Tests unitarios con **Vitest**: 57 tests de guards (incluida la integración con el router), stores, validadores, utilidades, interceptores, DataTable, acceso demo, cuentas recordadas e imágenes |
+| `npm test` / `npm run test:ci` | Tests unitarios con **Vitest**: 63 tests de guards (incluida la integración con el router), stores, validadores, utilidades, interceptores, DataTable, acceso demo, cuentas recordadas, imágenes y el resumen diario de la asistente |
 | `npm run lint` | ESLint + angular-eslint |
 | `npm run docs` | Documentación técnica con **Compodoc** en `documentation/` |
 | `npm run vercel-build` | Pipeline de despliegue: tests → build → docs en `www/docs` |
