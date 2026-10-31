@@ -1,4 +1,5 @@
 [
   { "title": "Manual de usuario", "file": "MANUAL_USUARIO.md" },
+  { "title": "Arquitectura de seguridad", "file": "security-architecture.md" },
   { "title": "Créditos de imágenes", "file": "CREDITOS_IMAGENES.md" }
 ]
