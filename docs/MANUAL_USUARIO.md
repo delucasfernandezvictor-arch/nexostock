@@ -35,7 +35,7 @@ Funciona en cualquier navegador moderno (ordenador, tablet o móvil) y se puede 
 2. Escribe tu email corporativo y tu contraseña. Puedes mostrar u ocultar la contraseña con el icono del ojo.
 3. Pulsa **Entrar**. Si el email o la contraseña no son correctos, verás un aviso en rojo bajo el formulario.
 
-Marca **Recordar mi email en este dispositivo** para que la próxima vez el email aparezca ya escrito. Solo se guarda el email, nunca la contraseña.
+Marca **Recordar mi cuenta en este dispositivo** y la próxima vez tu cuenta aparecerá en el desplegable **Modo Usuario**, en el grupo **Recordadas en este dispositivo**. Al elegirla se rellena tu email y el cursor salta a la contraseña. Se guardan el email, el nombre y el departamento, **nunca la contraseña**. Para olvidar la cuenta, inicia sesión con la casilla desmarcada.
 
 La sesión se mantiene aunque cierres el navegador. Si caduca, la app te pedirá entrar de nuevo y te devolverá a la pantalla en la que estabas.
 
@@ -52,7 +52,7 @@ Las credenciales se escriben solas en el formulario y aparece una etiqueta con l
    - Mientras escribes el email, la app **comprueba si ya está registrado** y te indica «Email disponible» o «Email ya registrado».
    - La contraseña debe tener **8 caracteres o más, una mayúscula, una minúscula y un número**. La lista de requisitos se marca en verde a medida que los cumples.
 3. Pulsa **Leer la política de uso de datos** para ver el texto completo. Puedes aceptarla desde la propia ventana con **He leído y acepto** o marcando la casilla.
-4. Si quieres, marca **Recordar mi email en este dispositivo**.
+4. Si quieres, marca **Recordar mi cuenta en este dispositivo** para que aparezca en el acceso rápido del login.
 5. Pulsa **Crear cuenta**. Si cambias de idea, usa **← Volver al inicio de sesión** en la parte superior.
 
 ### 3.3 Cerrar sesión

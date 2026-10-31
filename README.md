@@ -75,7 +75,7 @@ Arquitectura **MVVM** con separación estricta en capas y flujo de datos unidire
 | Cliente | `SqlApiService` con **HttpClient** y **Observables RxJS** | `RealtimeDocsService` con el SDK de Supabase, envuelto en `Observable` |
 | Datos | `profiles`, `categorias`, `productos`, `pedidos`, `pedido_lineas`, vistas `v_pedidos_resumen` y `v_lineas_detalle` | Tabla `documentos` con colecciones `actividad` (eventos del sistema) y `avisos` (comunicados), sin esquema fijo |
 | Concurrencia | `forkJoin` (dashboard, informes, inicio), `retry` con *backoff* exponencial, `switchMap` + *debounce* en validaciones | Fusión de la carga inicial con los eventos en vivo, Presence |
-| Archivos | — | **Supabase Storage**: bucket `productos` con las imágenes de producto (WebP optimizado en el navegador, URL pública cacheable, escritura solo para administradores mediante RLS) |
+| Archivos | — | **Supabase Storage**: bucket `productos` con las imágenes de producto (WebP optimizado en el navegador, URL pública cacheable, escritura solo para administradores mediante RLS). Fotos reales con licencia libre: [créditos](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/docs/CREDITOS_IMAGENES.md) |
 | Lógica de negocio | Funciones **RPC transaccionales**: `crear_pedido` (bloqueo `FOR UPDATE`, control de stock), `cambiar_estado_pedido`, `cambiar_rol`, `email_disponible` | Los *triggers* generan documentos de actividad en cada cambio relevante |
 
 El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/supabase/schema.sql) y los datos sintéticos en [`supabase/seed.sql`](https://github.com/delucasfernandezvictor-arch/nexostock/blob/main/supabase/seed.sql).
@@ -90,7 +90,7 @@ El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasf
   - `guestGuard`: impide volver al login con sesión iniciada.
 - **El control real está en el servidor**: **Row Level Security** en todas las tablas y funciones `SECURITY DEFINER` que validan el rol. Aunque se manipule el cliente, un usuario estándar no puede leer pedidos ajenos, crear productos ni cambiar roles. Se ha comprobado con peticiones directas a la API (código `42501`).
 - **Ningún secreto en el repositorio**: la URL y la clave *publishable* se inyectan en tiempo de build desde variables de entorno (`scripts/set-env.mjs`). `.env` y `runtime-env.ts` están en `.gitignore`. Las credenciales de prueba solo aparecen en el PDF de entrega.
-- **Acceso rápido de demostración**: el login ofrece las cuentas demo con un clic (administrador y un desplegable de usuarios). Sus contraseñas tampoco están en el código: llegan de las variables `DEMO_ADMIN_PASSWORD` y `DEMO_USER_PASSWORD`; si no se definen, el panel no aparece. «Recordar mi email» guarda solo el email en el dispositivo, nunca la contraseña.
+- **Acceso rápido de demostración**: el login ofrece las cuentas demo con un clic (administrador y un desplegable de usuarios). Sus contraseñas tampoco están en el código: llegan de las variables `DEMO_ADMIN_PASSWORD` y `DEMO_USER_PASSWORD`; si no se definen, el panel no aparece. «Recordar mi cuenta» guarda en el dispositivo (localStorage) el email, nombre y departamento, y la cuenta aparece en el desplegable del acceso rápido; la contraseña nunca se guarda.
 - **Storage protegido por RLS**: el bucket `productos` es de lectura pública, pero solo un administrador puede subir, cambiar o borrar imágenes (políticas sobre `storage.objects` con `public.is_admin()`). Además el bucket limita el tamaño a 2 MB y solo admite imágenes.
 - **Prevención de *open redirect*** en el login, **neutralización de inyección de fórmulas** en los CSV y cabeceras de seguridad (`HSTS`, `X-Frame-Options`, `nosniff`...) en `vercel.json`.
 - **Datos sintéticos**: dominio reservado `example.com` (RFC 2606). No hay datos personales reales.
@@ -135,7 +135,7 @@ El esquema completo está en [`supabase/schema.sql`](https://github.com/delucasf
 |---|---|
 | `npm start` | Servidor de desarrollo |
 | `npm run build` | Build de producción en `www/`: PWA con service worker y *hashing* |
-| `npm test` / `npm run test:ci` | Tests unitarios con **Vitest**: 53 tests de guards (incluida la integración con el router), stores, validadores, utilidades, interceptores, DataTable, acceso demo e imágenes |
+| `npm test` / `npm run test:ci` | Tests unitarios con **Vitest**: 57 tests de guards (incluida la integración con el router), stores, validadores, utilidades, interceptores, DataTable, acceso demo, cuentas recordadas e imágenes |
 | `npm run lint` | ESLint + angular-eslint |
 | `npm run docs` | Documentación técnica con **Compodoc** en `documentation/` |
 | `npm run vercel-build` | Pipeline de despliegue: tests → build → docs en `www/docs` |

@@ -1,4 +1,5 @@
 import { UserRole } from '../models';
+import { RememberedAccount } from '../utils/remember';
 import { AppConfig } from './app-config';
 
 /** Cuenta de demostración que se ofrece en el acceso rápido del login. */
@@ -11,9 +12,30 @@ export interface DemoAccount {
   color: string;
 }
 
+/**
+ * Cuenta del **acceso rápido** del login: una cuenta de demostración (con su
+ * contraseña) o una cuenta recordada en este dispositivo (sin contraseña).
+ */
+export interface QuickAccount extends DemoAccount {
+  /** Solo las cuentas demo la traen; las recordadas nunca guardan contraseña */
+  password?: string;
+  /** true si es una cuenta recordada en este dispositivo */
+  recordada?: boolean;
+}
+
 /** Cuenta de demostración con su contraseña ya resuelta. */
-export interface DemoCredentials extends DemoAccount {
+export interface DemoCredentials extends QuickAccount {
   password: string;
+}
+
+/** Colores de avatar con contraste AA sobre texto blanco. */
+const AVATAR_COLORS = ['#0b6e69', '#a3195b', '#a64b05', '#6d28d9', '#2f3fb8', '#b42318', '#0e7490', '#4d7c0f'] as const;
+
+/** Color estable para un email (el mismo email, siempre el mismo color). */
+export function avatarColor(email: string): string {
+  let h = 0;
+  for (const c of email) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return AVATAR_COLORS[h % AVATAR_COLORS.length]!;
 }
 
 /**
@@ -37,6 +59,17 @@ export const DEMO_ACCOUNTS: readonly DemoAccount[] = [
 export function demoCredentials(config: Pick<AppConfig, 'demoAdminPassword' | 'demoUserPassword'>): DemoCredentials[] {
   if (!config.demoAdminPassword || !config.demoUserPassword) return [];
   return DEMO_ACCOUNTS.map((a) => ({ ...a, password: a.role === 'admin' ? config.demoAdminPassword : config.demoUserPassword }));
+}
+
+/**
+ * Convierte las cuentas recordadas en cuentas de acceso rápido, quitando las que
+ * ya son cuentas de demostración (para no duplicarlas).
+ */
+export function rememberedQuickAccounts(remembered: readonly RememberedAccount[]): QuickAccount[] {
+  const demo = new Set(DEMO_ACCOUNTS.map((a) => a.email));
+  return remembered
+    .filter((a) => !demo.has(a.email))
+    .map((a) => ({ ...a, departamento: a.departamento || 'Sin departamento', color: avatarColor(a.email), recordada: true }));
 }
 
 /** Iniciales para el avatar: «Lucía Herrera» → «LH». */
