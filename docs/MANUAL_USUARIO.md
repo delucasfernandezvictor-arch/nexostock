@@ -145,6 +145,20 @@ Pendiente ──▶ Aprobado ──▶ Enviado ──▶ Entregado
 - **Conectados ahora:** usuarios con la aplicación abierta.
 - Los iconos de la cabecera descargan el **informe de ventas** con los filtros aplicados, en CSV o PDF.
 
+### 10.1 Nexa, tu asistente
+
+Abajo a la derecha tienes el botón **Nexa**. Si muestra un punto rojo, hay un resumen nuevo del día. Al pulsarlo, Nexa te saluda y te lee el resumen:
+
+- la **fecha de hoy**,
+- los **pedidos pendientes**, empezando por el más urgente,
+- los **envíos atrasados**,
+- los productos **agotados o con poco stock**,
+- las **ventas de hoy** comparadas con las de ayer,
+- las **personas nuevas** del equipo,
+- **recordatorios** según el día (cierre de mes, inicio de mes, lunes, viernes…) y un consejo.
+
+Cada punto tiene un enlace a la pantalla correspondiente. **Detener** corta la voz y **Leer al abrir** activa o desactiva la lectura automática. El texto está siempre en pantalla, así que puedes usarla sin sonido. La voz depende del navegador: en Edge y Chrome suena una voz femenina en español.
+
 ## 11. Gestión de productos (administrador)
 
 1. Desde el catálogo, pulsa **Nuevo producto** o el icono del lápiz.

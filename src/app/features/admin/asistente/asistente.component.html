@@ -1,0 +1,78 @@
+<aside class="nexa-dock" aria-label="Asistente">
+<button
+  type="button"
+  class="nexa-fab"
+  [class.speaking]="voz.speaking()"
+  aria-haspopup="dialog"
+  [attr.aria-label]="'Abrir a ' + nombre + ', tu asistente' + (nuevo() ? '. Tienes un resumen nuevo de hoy' : '')"
+  (click)="abrir()">
+  <span class="orb" aria-hidden="true"><ion-icon name="sparkles"></ion-icon></span>
+  <span class="fab-text" aria-hidden="true">{{ nombre }}</span>
+  @if (nuevo()) { <span class="dot" aria-hidden="true"></span> }
+</button>
+</aside>
+
+<ion-modal class="nexa-modal" [isOpen]="abierto()" (didDismiss)="cerrar()" aria-label="Nexa, asistente de NexoStock">
+  <ng-template>
+    <section class="nexa" aria-labelledby="nexa-title">
+      <header class="hero">
+        <app-ai-waves class="waves" [active]="voz.speaking()" [pulse]="voz.pulso()" />
+        <div class="hero-text">
+          <p class="overline">Asistente de NexoStock</p>
+          <h2 id="nexa-title">{{ nombre }}</h2>
+          <p class="estado" role="status">
+            <span class="led" [class.on]="voz.speaking()" aria-hidden="true"></span>{{ estado() }}
+          </p>
+        </div>
+        <button type="button" class="close" (click)="cerrar()" aria-label="Cerrar el asistente">
+          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </header>
+
+      <div class="body">
+        @if (data.isLoading()) {
+          <div class="loading"><ion-spinner name="dots" aria-hidden="true"></ion-spinner> Revisando pedidos, stock y ventas…</div>
+        } @else if (data.error()) {
+          <p class="error" role="alert">No he podido consultar los datos. Comprueba la conexión e inténtalo de nuevo.</p>
+        } @else if (briefing(); as b) {
+          <p class="saludo" [class.now]="voz.frase() === 0">{{ b.saludo }}</p>
+          <p class="fecha" [class.now]="voz.frase() === 1">{{ b.fecha }}</p>
+
+          <ol class="items" aria-label="Resumen del día">
+            @for (item of b.items; track $index; let i = $index) {
+              <li class="item" [attr.data-tipo]="item.tipo" [class.now]="voz.frase() === i + 2"
+                [attr.aria-current]="voz.frase() === i + 2 ? 'step' : null">
+                <span class="ico" aria-hidden="true"><ion-icon [name]="iconos[item.tipo]"></ion-icon></span>
+                <div class="item-body">
+                  <h3>{{ item.titulo }}</h3>
+                  <p>{{ item.texto }}</p>
+                  @if (item.accion; as a) {
+                    <button type="button" class="action" (click)="ir(a.url)">{{ a.label }} →</button>
+                  }
+                </div>
+              </li>
+            }
+          </ol>
+          <p class="despedida" [class.now]="voz.frase() === b.items.length + 2">{{ b.despedida }}</p>
+        }
+      </div>
+
+      <footer class="controls">
+        @if (voz.supported) {
+          <ion-button (click)="alternarVoz()" [disabled]="!briefing()">
+            <ion-icon slot="start" [name]="voz.speaking() ? 'stop-circle-outline' : 'volume-high-outline'" aria-hidden="true"></ion-icon>
+            {{ voz.speaking() ? 'Detener' : 'Escuchar' }}
+          </ion-button>
+          <ion-toggle [checked]="vozAuto()" (ionChange)="cambiarVozAuto($event.detail.checked)" labelPlacement="end" justify="start">
+            Leer al abrir
+          </ion-toggle>
+        } @else {
+          <p class="hint">Tu navegador no permite la lectura en voz alta; el resumen está en pantalla.</p>
+        }
+        <ion-button fill="clear" (click)="actualizar()" [disabled]="data.isLoading()">
+          <ion-icon slot="start" name="refresh-outline" aria-hidden="true"></ion-icon> Actualizar
+        </ion-button>
+      </footer>
+    </section>
+  </ng-template>
+</ion-modal>

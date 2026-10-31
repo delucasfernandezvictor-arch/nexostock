@@ -135,6 +135,7 @@ export const AYUDA: SeccionAyuda[] = [
       'En «Usuarios y roles» puedes conceder o retirar el rol de administrador.',
       'Por seguridad, no puedes quitarte a ti mismo el rol de administrador.',
       'En «Avisos» publicas comunicados que aparecen al instante en la pantalla de Inicio de todos los usuarios.',
+      'Pulsa el botón «Nexa» (abajo a la derecha) para escuchar el resumen del día: pedidos urgentes, stock bajo, ventas de hoy y recordatorios. Cambia cada día y puedes detener la voz cuando quieras.',
     ],
   },
   {

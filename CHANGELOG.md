@@ -2,16 +2,23 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
-## [1.4.0] - 2026-10-30
+## [1.4.0] - 2026-10-31
 
 ### Añadido
+- **Nexa, la asistente del administrador**: un botón flotante abre el resumen del día creado con los datos reales (pedidos pendientes ordenados por urgencia, envíos atrasados, stock bajo o agotado, ventas de hoy frente a ayer y altas de usuarios), más recordatorios de calendario (cierre e inicio de mes, lunes, viernes y fin de semana) y un consejo diario. El resumen cambia cada día.
+- Lectura en voz alta con la Web Speech API: elige automáticamente una voz femenina en español (neuronal si existe) y resalta la frase que se está leyendo.
+- Componente reutilizable `app-ai-waves`: ondas animadas en canvas que reaccionan a cada palabra y respetan `prefers-reduced-motion`.
+- El código de la asistente se carga con `@defer` solo para administradores: un usuario estándar ni lo descarga.
 - **Cuentas recordadas en este dispositivo**: al marcar «Recordar mi cuenta» en el login o el registro, la cuenta aparece en el desplegable *Modo Usuario*, en su propio grupo. Al elegirla se rellena el email y el foco pasa a la contraseña, que nunca se guarda.
 - Desplegable agrupado («Recordadas en este dispositivo» y «Cuentas de demostración») siguiendo el patrón *listbox* con grupos de WAI-ARIA.
 - Fotos reales de producto con licencia libre (Pexels, Unsplash y Wikimedia Commons) en Supabase Storage, con sus créditos en `docs/CREDITOS_IMAGENES.md`.
-- 4 tests nuevos (57 en total).
+- 10 tests nuevos (63 en total).
 
 ### Cambiado
 - «Recordar mi email» pasa a ser «Recordar mi cuenta» (email, nombre y departamento, sin contraseña).
+
+### Corregido
+- El modal de la política de uso de datos ya anuncia su nombre a los lectores de pantalla (`aria-label` en `ion-modal`).
 
 ## [1.3.0] - 2026-10-29
 

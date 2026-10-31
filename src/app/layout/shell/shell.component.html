@@ -68,3 +68,10 @@
 
   <ion-router-outlet id="main"></ion-router-outlet>
 </ion-split-pane>
+
+<!-- Asistente del administrador: su código solo se descarga si el rol es admin -->
+@if (auth.isAdmin()) {
+  @defer (on idle) {
+    <app-asistente />
+  }
+}

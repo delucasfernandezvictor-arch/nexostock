@@ -17,6 +17,7 @@ import { RealtimeDocsService } from '../../core/services/realtime-docs.service';
 import { AuthStore } from '../../core/state/auth.store';
 import { CartStore } from '../../core/state/cart.store';
 import { UiStore } from '../../core/state/ui.store';
+import { AsistenteComponent } from '../../features/admin/asistente/asistente.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 
 /** Entrada del menú lateral. */
@@ -50,7 +51,7 @@ interface MenuSection {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RouterLink, RouterLinkActive, IonRouterLink, IonSplitPane, IonMenu, IonHeader, IonToolbar, IonTitle, IonContent,
-    IonItem, IonIcon, IonLabel, IonMenuToggle, IonRouterOutlet, IonButton, IonBadge, StatusBadgeComponent,
+    IonItem, IonIcon, IonLabel, IonMenuToggle, IonRouterOutlet, IonButton, IonBadge, StatusBadgeComponent, AsistenteComponent,
   ],
 })
 export class ShellComponent {
