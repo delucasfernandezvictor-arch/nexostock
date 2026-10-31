@@ -1,0 +1,178 @@
+// --- Botón flotante
+.nexa-fab {
+  position: fixed;
+  right: calc(1rem + env(safe-area-inset-right));
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: 15;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1rem 0.35rem 0.35rem;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0b1026, #1e1b4b);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 28px rgb(76 29 149 / 35%);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+  &:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgb(76 29 149 / 45%); }
+  &:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 3px; }
+}
+
+.orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #22d3ee, #8b5cf6, #ec4899, #22d3ee);
+  animation: girar 6s linear infinite;
+  ion-icon { font-size: 1.2rem; color: #fff; animation: girar 6s linear infinite reverse; }
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid #22d3ee;
+    opacity: 0;
+  }
+}
+.speaking .orb::after { animation: latido 1s ease-out infinite; }
+
+.dot {
+  position: absolute;
+  top: 0.2rem;
+  left: 2.2rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid #0b1026;
+  border-radius: 50%;
+  background: #f43f5e;
+}
+
+// --- Diálogo
+.nexa-modal {
+  --width: min(36rem, 100%);
+  --height: min(46rem, 100%);
+  --border-radius: 1.25rem;
+}
+
+.nexa { display: flex; flex-direction: column; height: 100%; background: var(--app-surface); color: var(--ion-text-color); }
+
+.hero {
+  position: relative;
+  flex: none;
+  height: 12.5rem;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 50%, #17205a 0%, #0b1026 65%, #070a1a 100%);
+  color: #fff;
+}
+.waves { position: absolute; inset: 0; }
+.hero-text {
+  position: absolute;
+  left: 1.25rem;
+  bottom: 1rem;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 70%);
+  h2 { margin: 0; font-size: 1.9rem; font-weight: 800; letter-spacing: -0.01em; }
+}
+.overline { margin: 0; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #a5f3fc; }
+.estado { display: flex; align-items: center; gap: 0.4rem; margin: 0.15rem 0 0; font-size: 0.875rem; color: #e0e7ff; }
+.led { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #64748b; &.on { background: #22d3ee; box-shadow: 0 0 10px #22d3ee; } }
+
+.close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 14%);
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  &:hover { background: rgb(255 255 255 / 24%); }
+  &:focus-visible { outline: 3px solid #a5f3fc; outline-offset: 2px; }
+}
+
+.body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 0.5rem; }
+.loading { display: flex; align-items: center; gap: 0.5rem; color: var(--app-muted); }
+.error { color: var(--app-text-danger); font-weight: 600; }
+
+.saludo, .fecha, .despedida { margin: 0 0 0.6rem; padding: 0.15rem 0.5rem; border-radius: 0.5rem; transition: background 0.2s ease; }
+.saludo { font-size: 1.0625rem; font-weight: 600; }
+.fecha { color: var(--app-muted); font-weight: 600; &::first-letter { text-transform: uppercase; } }
+
+.items { margin: 0.75rem 0; padding: 0; list-style: none; display: grid; gap: 0.6rem; }
+.item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--app-border);
+  border-left-width: 4px;
+  border-radius: 0.75rem;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  h3 { margin: 0 0 0.15rem; font-size: 0.9375rem; font-weight: 800; }
+  p { margin: 0; font-size: 0.9rem; line-height: 1.45; }
+}
+.item-body { min-width: 0; }
+.ico { display: grid; place-items: center; flex: none; width: 2.1rem; height: 2.1rem; border-radius: 0.6rem; font-size: 1.15rem; }
+
+.item[data-tipo='urgente'] { border-left-color: #dc2626; .ico { background: var(--app-badge-danger-bg); color: var(--app-badge-danger-fg); } }
+.item[data-tipo='stock'] { border-left-color: #d97706; .ico { background: var(--app-badge-warning-bg); color: var(--app-badge-warning-fg); } }
+.item[data-tipo='ventas'] { border-left-color: #16a34a; .ico { background: var(--app-badge-success-bg); color: var(--app-badge-success-fg); } }
+.item[data-tipo='equipo'] { border-left-color: #2563eb; .ico { background: var(--app-badge-info-bg); color: var(--app-badge-info-fg); } }
+.item[data-tipo='recordatorio'] { border-left-color: #7c3aed; .ico { background: var(--app-badge-primary-bg); color: var(--app-badge-primary-fg); } }
+
+// Frase que se está leyendo
+.now { background: var(--app-hover); box-shadow: 0 0 0 2px color-mix(in srgb, #22d3ee 55%, transparent); }
+
+.action {
+  margin-top: 0.35rem;
+  padding: 0.2rem 0;
+  border: 0;
+  background: none;
+  color: var(--app-text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  &:hover { text-decoration: underline; }
+  &:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; border-radius: 0.25rem; }
+}
+
+.controls {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--app-border);
+  ion-toggle { font-size: 0.9rem; }
+}
+.hint { margin: 0; font-size: 0.875rem; color: var(--app-muted); }
+
+@keyframes girar { to { rotate: 360deg; } }
+@keyframes latido {
+  from { opacity: 0.9; transform: scale(1); }
+  to { opacity: 0; transform: scale(1.45); }
+}
+
+@media (max-width: 480px) {
+  .fab-text { display: none; }
+  .nexa-fab { padding: 0.35rem; }
+  .dot { left: auto; right: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb, .orb ion-icon, .speaking .orb::after { animation: none; }
+  .nexa-fab { transition: none; &:hover { transform: none; } }
+}
