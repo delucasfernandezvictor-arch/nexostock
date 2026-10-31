@@ -123,6 +123,21 @@
   &:focus-visible { outline: 3px solid var(--app-focus); outline-offset: 2px; }
 }
 
+.group {
+  & + & { margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px solid var(--app-border); }
+}
+.group-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem 0.25rem;
+  color: var(--app-muted);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .option {
   display: flex;
   align-items: center;

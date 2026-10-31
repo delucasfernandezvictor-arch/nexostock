@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DemoCredentials, demoCredentials, initials } from '../../../core/config/demo-accounts';
-import { getRememberedEmail, setRememberedEmail } from '../../../core/utils/remember';
+import { QuickAccount, avatarColor, demoCredentials, initials, rememberedQuickAccounts } from '../../../core/config/demo-accounts';
+import { MAX_REMEMBERED, getRememberedAccounts, getRememberedEmail, rememberAccount, setRememberedEmail } from '../../../core/utils/remember';
 import { DemoAccessComponent } from './demo-access.component';
 
 const ACCOUNTS = demoCredentials({ demoAdminPassword: 'admin-pass', demoUserPassword: 'user-pass' });
 
 describe('DemoAccessComponent', () => {
   let fixture: ComponentFixture<DemoAccessComponent>;
-  let picked: DemoCredentials[];
+  let picked: QuickAccount[];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({ imports: [DemoAccessComponent] }).compileComponents();
@@ -63,6 +63,21 @@ describe('DemoAccessComponent', () => {
     await fixture.whenStable();
     expect(el().querySelector('.demo')).toBeNull();
   });
+
+  it('las cuentas recordadas salen primero, en su propio grupo, y se eligen sin contraseña', async () => {
+    const recordadas = rememberedQuickAccounts([{ email: 'nuevo@example.com', nombre: 'Nuevo Usuario', departamento: 'Ventas', role: 'user' }]);
+    fixture.componentRef.setInput('accounts', [...recordadas, ...ACCOUNTS]);
+    await fixture.whenStable();
+    trigger().click();
+    await fixture.whenStable();
+    const groups = el().querySelectorAll('[role="group"]');
+    expect(groups.length).toBe(2);
+    expect(groups[0]!.textContent).toContain('Recordadas en este dispositivo');
+    expect(groups[0]!.textContent).toContain('Nuevo Usuario');
+    (el().querySelector('[role="option"]') as HTMLElement).click();
+    expect(picked[0]).toMatchObject({ email: 'nuevo@example.com', recordada: true });
+    expect(picked[0]!.password).toBeUndefined();
+  });
 });
 
 describe('utilidades de acceso', () => {
@@ -77,5 +92,35 @@ describe('utilidades de acceso', () => {
     expect(getRememberedEmail()).toBe('lucia.herrera@example.com');
     setRememberedEmail('lucia.herrera@example.com', false);
     expect(getRememberedEmail()).toBe('');
+  });
+
+  it('recuerda cuentas sin contraseña: la última primero, sin duplicados y con límite', () => {
+    localStorage.clear();
+    for (let i = 0; i < MAX_REMEMBERED + 2; i++) {
+      rememberAccount({ email: `u${i}@example.com`, nombre: `Usuario ${i}`, departamento: 'Ventas', role: 'user' }, true);
+    }
+    rememberAccount({ email: 'U3@Example.com', nombre: 'Usuario 3', departamento: 'Ventas', role: 'user' }, true);
+    const cuentas = getRememberedAccounts();
+    expect(cuentas.length).toBe(MAX_REMEMBERED);
+    expect(cuentas[0]!.email).toBe('u3@example.com');
+    expect(cuentas.filter((c) => c.email === 'u3@example.com').length).toBe(1);
+    expect(JSON.stringify(localStorage)).not.toContain('password');
+    rememberAccount({ email: 'u3@example.com', nombre: '', departamento: '', role: 'user' }, false);
+    expect(getRememberedAccounts().some((c) => c.email === 'u3@example.com')).toBe(false);
+  });
+
+  it('no duplica las cuentas demo y da a cada email un color estable', () => {
+    const quick = rememberedQuickAccounts([
+      { email: 'usuario@example.com', nombre: 'Usuario Demo', departamento: 'Logística', role: 'user' },
+      { email: 'otra@example.com', nombre: 'Otra', departamento: '', role: 'user' },
+    ]);
+    expect(quick.map((q) => q.email)).toEqual(['otra@example.com']);
+    expect(quick[0]!.departamento).toBe('Sin departamento');
+    expect(avatarColor('otra@example.com')).toBe(avatarColor('otra@example.com'));
+  });
+
+  it('ignora datos corruptos en el almacenamiento', () => {
+    localStorage.setItem('nexostock.cuentas-recordadas', '{no es json');
+    expect(getRememberedAccounts()).toEqual([]);
   });
 });

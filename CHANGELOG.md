@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer](https://semver.org/lang/es/).
 
+## [1.4.0] - 2026-10-30
+
+### Añadido
+- **Cuentas recordadas en este dispositivo**: al marcar «Recordar mi cuenta» en el login o el registro, la cuenta aparece en el desplegable *Modo Usuario*, en su propio grupo. Al elegirla se rellena el email y el foco pasa a la contraseña, que nunca se guarda.
+- Desplegable agrupado («Recordadas en este dispositivo» y «Cuentas de demostración») siguiendo el patrón *listbox* con grupos de WAI-ARIA.
+- Fotos reales de producto con licencia libre (Pexels, Unsplash y Wikimedia Commons) en Supabase Storage, con sus créditos en `docs/CREDITOS_IMAGENES.md`.
+- 4 tests nuevos (57 en total).
+
+### Cambiado
+- «Recordar mi email» pasa a ser «Recordar mi cuenta» (email, nombre y departamento, sin contraseña).
+
 ## [1.3.0] - 2026-10-29
 
 ### Añadido
