@@ -82,7 +82,7 @@
     <p class="auth-foot">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
   </app-auth-layout>
 
-  <ion-modal [isOpen]="termsOpen()" (didDismiss)="termsOpen.set(false)" aria-labelledby="terms-title">
+  <ion-modal [isOpen]="termsOpen()" (didDismiss)="termsOpen.set(false)" aria-label="Política de uso de datos">
     <ng-template>
       <ion-header>
         <ion-toolbar color="primary">
